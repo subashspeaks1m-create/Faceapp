@@ -14,24 +14,19 @@ This is a production-oriented specification and tested scaffold, not a finished 
 
 ## Bootstrap
 
-Use Python3.12 and a Node version supported by the selected web/Expo packages. Create a virtual environment, install requirements-dev.txt, then install JavaScript workspaces and freeze lockfiles only after compatibility checks:
+Current implementation status, commands run and blockers live in [PROGRESS.md](PROGRESS.md). Architecture decisions are in [docs/adr](docs/adr).
 
 ```sh
-python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements-dev.txt
-npm install
-make contracts
-npm run test
-npm run lint
-npm run build
-cp .env.example .env
-npm run docker:up
-npm run dev
+make python-env          # Python 3.12 venv from requirements-dev.lock (needs uv)
+npm ci                   # JS workspaces from package-lock.json
+make test                # unit/contract tests; integration tests skip without services
+make lint
+npm run build --workspaces
 ```
 
-`make dev-mobile` uses a custom Expo development build; VisionCamera is not available merely by opening Expo Go. `make dev-web` starts Next. Set local-only credentials in .env; never commit real secrets. Docker starts PostgreSQL/Redis/MinIO/API shell, not a running commercial inference service. Initialize a private ephemeral bucket and implement Runtime/repositories/worker/purge before a real user flow. /health and /openapi.json are available; unconfigured portrait routes return503. See VALIDATION_REPORT.md for actual checks, not inferred passes.
+Backend with local services (PostgreSQL, Redis, SeaweedFS S3): follow "Startup" in PROGRESS.md. `make test` runs the 25 integration tests when `PORTRAITLAB_TEST_DATABASE_URL` and `PORTRAITLAB_TEST_S3_*` are set. With no approved detector in `model-registry.json`, upload finalization returns 503 `DETECTOR_UNAVAILABLE` and every filter returns `FILTER_UNAVAILABLE`; nothing is simulated.
 
-Expo53/Reanimated3 is the requested legacy compatibility track. Web uses Next16.4/React19.3 bootstrap candidates researched2026-10-10. Recheck official security and store requirements, freeze supported versions and image digests, then run device/GPU/DB/deletion tests. None of those integration builds is claimed as verified here.
+`make dev-mobile` uses a custom Expo development build; VisionCamera is not available merely by opening Expo Go. `make dev-web` starts Next. Expo 53/Reanimated 3 is the requested legacy compatibility track; see PROGRESS.md for its open npm advisories.
 
 ## Handoff
 

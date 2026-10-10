@@ -24,11 +24,15 @@ openapi = json.loads((R / "docs/openapi.json").read_text())
 assert openapi["openapi"] == "3.1.0"
 assert yaml.safe_load((R / "docs/openapi.yaml").read_text()) == openapi
 compose = yaml.safe_load((R / "docker-compose.yml").read_text())
-assert set(compose["services"]) == {"postgres", "redis", "minio", "api"}
+assert set(compose["services"]) == {"postgres", "redis", "s3", "migrate", "api", "worker", "daemons"}
+# Executable migration copy must match the documented raw-constraint source.
+doc_sql = (R / "docs/migration_constraints.sql").read_text().splitlines()[1:]
+migration_sql = (R / "db/migrations/0002_constraints.sql").read_text().splitlines()[1:]
+assert doc_sql == migration_sql, "db/migrations/0002_constraints.sql drifted from docs/migration_constraints.sql"
 for f in (R / "assets/luts").glob("*.cube"):
     rows = f.read_text().splitlines()
     size = int(next(line.split()[1] for line in rows if line.startswith("LUT_3D_SIZE")))
     values = [[float(x) for x in line.split()] for line in rows if line and line[0].isdigit()]
     assert len(values) == size**3
     assert all(len(row) == 3 and all(0 <= v <= 1 for v in row) for row in values)
-print("Python syntax, JSON/YAML, SVG, LUTs, 12 filter references and OpenAPI equivalence passed.")
+print("Python syntax, JSON/YAML, SVG, LUTs, 12 filter references, OpenAPI equivalence and migration copy passed.")

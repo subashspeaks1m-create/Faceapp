@@ -9,6 +9,8 @@ import yaml
 R = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(R / "packages/shared-types"))
 from schemas import (  # noqa: E402 — local standalone module path is configured above
+    ConsentRequest,
+    ConsentReceipt,
     UploadRequest,
     UploadGrant,
     UploadComplete,
@@ -30,6 +32,8 @@ doc["servers"] = [
 (R / "docs/openapi.json").write_text(json.dumps(doc, indent=2) + "\n")
 (R / "docs/openapi.yaml").write_text(yaml.safe_dump(doc, sort_keys=False, allow_unicode=True))
 for model in (
+    ConsentRequest,
+    ConsentReceipt,
     UploadRequest,
     UploadGrant,
     UploadComplete,
@@ -42,4 +46,4 @@ for model in (
     path = R / "packages/shared-types/json-schema" / f"{model.__name__}.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(model.model_json_schema(), indent=2) + "\n")
-print("Generated OpenAPI 3.1 and eight JSON Schema contracts.")
+print("Generated OpenAPI 3.1 and ten JSON Schema contracts.")

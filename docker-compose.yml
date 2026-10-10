@@ -1,5 +1,20 @@
 # Local development only. Production uses secret manager, private network/TLS,
-# pinned image digests, approved models and implemented Runtime/worker/purge.
+# pinned image digests, approved models and the implemented runtime/worker/purge.
+x-runtime-env: &runtime-env
+  PORTRAITLAB_ENV: development
+  DATABASE_URL: postgresql://portraitlab:${POSTGRES_PASSWORD}@postgres:5432/portraitlab
+  REDIS_URL: redis://redis:6379/0
+  S3_BUCKET: ${S3_BUCKET:-portraitlab-ephemeral}
+  S3_INTERNAL_ENDPOINT: http://s3:8333
+  S3_PUBLIC_ENDPOINT: ${S3_PUBLIC_ENDPOINT:-http://localhost:8333}
+  S3_ACCESS_KEY: ${S3_ACCESS_KEY:?Set development storage key}
+  S3_SECRET_KEY: ${S3_SECRET_KEY:?Set development storage secret}
+  JWT_ISSUER: ${JWT_ISSUER:?Set JWT issuer}
+  JWT_AUDIENCE: ${JWT_AUDIENCE:?Set JWT audience}
+  JWT_DEV_HS256_SECRET: ${JWT_DEV_HS256_SECRET:-}
+  JWT_PUBLIC_KEY_PEM: ${JWT_PUBLIC_KEY_PEM:-}
+  JWT_JWKS_URL: ${JWT_JWKS_URL:-}
+  MEDIA_TOKEN_SECRET: ${MEDIA_TOKEN_SECRET:?Set media token secret (32+ bytes)}
 services:
   postgres:
     image: postgres:16
@@ -16,32 +31,44 @@ services:
       retries: 10
   redis:
     image: redis:7-alpine
-    command: ["redis-server", "--appendonly", "yes"]
+    # Transport only: no portrait bytes or results. No persistence needed.
     ports: ["127.0.0.1:6379:6379"]
-    volumes: ["redis_metadata:/data"]
-  minio:
-    image: minio/minio:RELEASE.2025-04-22T22-12-26Z
-    command: server /data --console-address :9001
-    environment:
-      MINIO_ROOT_USER: ${S3_ACCESS_KEY:?Set development storage user}
-      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:?Set development storage secret}
-    ports: ["127.0.0.1:9000:9000", "127.0.0.1:9001:9001"]
+  s3:
+    # SeaweedFS S3 gateway (Apache-2.0). The MinIO image named by the original
+    # bundle no longer pulls from Docker Hub; see docs/adr/0002-local-object-store.md.
+    image: chrislusf/seaweedfs:3.97
+    command: >-
+      server -dir=/data -master.volumeSizeLimitMB=8 -master.volumePreallocate=false
+      -volume.max=100 -s3 -s3.config=/etc/seaweedfs/s3.json
+    ports: ["127.0.0.1:8333:8333"]
+    volumes: ["./infra/seaweedfs/s3.json:/etc/seaweedfs/s3.json:ro"]
     # Ephemeral images on tmpfs; no backup/history. Does not replace per-job purge.
-    tmpfs: ["/data:size=512m"]
-  api:
-    build:
-      context: .
-      dockerfile: apps/api-server/Dockerfile
-    ports: ["127.0.0.1:8000:8000"]
-    environment:
-      DATABASE_URL: postgresql://portraitlab:${POSTGRES_PASSWORD}@postgres:5432/portraitlab
-      REDIS_URL: redis://redis:6379/0
-      S3_INTERNAL_ENDPOINT: http://minio:9000
-      S3_PUBLIC_ENDPOINT: http://localhost:9000
+    tmpfs: ["/data:size=1g"]
+  migrate:
+    build: {context: ., dockerfile: apps/api-server/Dockerfile}
+    command: ["python", "-m", "portraitlab.service", "migrate"]
+    environment: *runtime-env
     depends_on:
       postgres: {condition: service_healthy}
+  api:
+    build: {context: ., dockerfile: apps/api-server/Dockerfile}
+    ports: ["127.0.0.1:8000:8000"]
+    environment: *runtime-env
+    depends_on:
+      migrate: {condition: service_completed_successfully}
       redis: {condition: service_started}
-      minio: {condition: service_started}
+      s3: {condition: service_started}
+  worker:
+    build: {context: ., dockerfile: apps/api-server/Dockerfile}
+    command: ["celery", "-A", "portraitlab.tasks", "worker", "--loglevel=INFO"]
+    environment: *runtime-env
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+  daemons:
+    build: {context: ., dockerfile: apps/api-server/Dockerfile}
+    command: ["python", "-m", "portraitlab.service", "daemons"]
+    environment: *runtime-env
+    depends_on:
+      migrate: {condition: service_completed_successfully}
 volumes:
   pg_metadata:
-  redis_metadata:

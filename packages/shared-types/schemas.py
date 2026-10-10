@@ -32,6 +32,21 @@ class Options(WireModel):
     makeup: StrictFloat | None = Field(default=None, ge=0, le=1)
 
 
+class ConsentRequest(WireModel):
+    policy_version: str = Field(min_length=1, max_length=64)
+    purpose: Literal["portrait_editing"]
+    processor_region: Literal["us", "eu"]
+
+
+class ConsentReceipt(WireModel):
+    consent_receipt_id: UUID
+    policy_version: str
+    purpose: Literal["portrait_editing"]
+    processor_region: Literal["us", "eu"]
+    accepted_at: AwareDatetime
+    withdrawn_at: AwareDatetime | None = None
+
+
 class UploadRequest(WireModel):
     mime_type: Literal["image/jpeg", "image/png", "image/heic"]
     byte_length: StrictInt = Field(ge=1, le=10_485_760)

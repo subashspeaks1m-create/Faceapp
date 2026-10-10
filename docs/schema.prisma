@@ -3,10 +3,12 @@
 generator client {
   provider = "prisma-client-js"
 }
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 enum JobStatus {
   QUEUED
   RUNNING
@@ -17,6 +19,7 @@ enum JobStatus {
   EXPIRED
   PURGED
 }
+
 enum CreditKind {
   GRANT
   RESERVE
@@ -24,49 +27,79 @@ enum CreditKind {
   RELEASE
   REFUND
 }
+
 model User {
-  id                 String              @id @default(uuid()) @db.Uuid
-  externalSubject    String              @unique @db.VarChar(255)
-  createdAt          DateTime            @default(now()) @db.Timestamptz(6)
-  deletedAt          DateTime?           @db.Timestamptz(6)
-  jobs               ImageJob[]
-  presets            FilterPreset[]
-  credits            CreditTransaction[]
-  audits             AuditLog[]
-  uploads            UploadAsset[]
-  consents           ConsentReceipt[]
-  wallet             CreditWallet?
+  id              String              @id @default(uuid()) @db.Uuid
+  externalSubject String              @unique @db.VarChar(255)
+  createdAt       DateTime            @default(now()) @db.Timestamptz(6)
+  deletedAt       DateTime?           @db.Timestamptz(6)
+  jobs            ImageJob[]
+  presets         FilterPreset[]
+  credits         CreditTransaction[]
+  audits          AuditLog[]
+  uploads         UploadAsset[]
+  consents        ConsentReceipt[]
+  wallet          CreditWallet?
 }
+
 model ConsentReceipt {
-  id                 String              @id @default(uuid()) @db.Uuid
-  userId             String              @db.Uuid
-  policyVersion      String              @db.VarChar(64)
-  processorRegion    String              @db.VarChar(64)
-  purpose            String              @db.VarChar(64)
-  acceptedAt         DateTime            @db.Timestamptz(6)
-  withdrawnAt        DateTime?           @db.Timestamptz(6)
-  user               User                @relation(fields:[userId], references:[id], onDelete:Restrict)
-  uploads            UploadAsset[]
-  @@unique([id,userId])
-  @@index([userId,acceptedAt])
+  id              String        @id @default(uuid()) @db.Uuid
+  userId          String        @db.Uuid
+  policyVersion   String        @db.VarChar(64)
+  processorRegion String        @db.VarChar(64)
+  purpose         String        @db.VarChar(64)
+  acceptedAt      DateTime      @db.Timestamptz(6)
+  withdrawnAt     DateTime?     @db.Timestamptz(6)
+  user            User          @relation(fields: [userId], references: [id], onDelete: Restrict)
+  uploads         UploadAsset[]
+
+  @@unique([id, userId])
+  @@index([userId, acceptedAt])
 }
+
 model UploadAsset {
-  id                 String              @id @default(uuid()) @db.Uuid
-  userId             String              @db.Uuid
-  consentReceiptId   String              @db.Uuid
-  objectPrefix       String?             @unique
-  mimeType           String              @db.VarChar(32)
-  byteLength         BigInt
-  checksumSha256     String?             @db.Char(64)
-  finalizedAt        DateTime?           @db.Timestamptz(6)
-  expiresAt          DateTime            @db.Timestamptz(6)
-  purgedAt           DateTime?           @db.Timestamptz(6)
-  user               User                @relation(fields:[userId], references:[id], onDelete:Restrict)
-  consent            ConsentReceipt      @relation(fields:[consentReceiptId], references:[id], onDelete:Restrict)
-  jobs               ImageJob[]
-  @@unique([id,userId])
-  @@index([expiresAt,purgedAt])
+  id                String         @id @default(uuid()) @db.Uuid
+  userId            String         @db.Uuid
+  consentReceiptId  String         @db.Uuid
+  objectPrefix      String?        @unique
+  mimeType          String         @db.VarChar(32)
+  byteLength        BigInt
+  checksumSha256    String?        @db.Char(64)
+  normalizedWidth   Int?
+  normalizedHeight  Int?
+  createdAt         DateTime       @default(now()) @db.Timestamptz(6)
+  finalizedAt       DateTime?      @db.Timestamptz(6)
+  expiresAt         DateTime       @db.Timestamptz(6)
+  purgeAttemptCount Int            @default(0)
+  nextPurgeAt       DateTime?      @db.Timestamptz(6)
+  purgedAt          DateTime?      @db.Timestamptz(6)
+  user              User           @relation(fields: [userId], references: [id], onDelete: Restrict)
+  consent           ConsentReceipt @relation(fields: [consentReceiptId], references: [id], onDelete: Restrict)
+  jobs              ImageJob[]
+  faces             AssetFace[]
+
+  @@unique([id, userId])
+  @@index([expiresAt, purgedAt])
+  @@index([userId, createdAt])
 }
+
+// Opaque, asset-scoped face handles. Geometry only (box + five alignment points);
+// never recognition embeddings. Rows are deleted when the source asset is purged.
+model AssetFace {
+  id         String      @id @default(uuid()) @db.Uuid
+  assetId    String      @db.Uuid
+  userId     String      @db.Uuid
+  ordinal    Int
+  bbox       Json
+  landmarks5 Json
+  score      Float
+  createdAt  DateTime    @default(now()) @db.Timestamptz(6)
+  asset      UploadAsset @relation(fields: [assetId], references: [id], onDelete: Restrict)
+
+  @@unique([id, userId])
+  @@unique([assetId, ordinal])
+}
+
 model ImageJob {
   id                 String              @id @default(uuid()) @db.Uuid
   userId             String              @db.Uuid
@@ -80,6 +113,7 @@ model ImageJob {
   candidateRevision  Int
   eventRevision      Int                 @default(0)
   status             JobStatus           @default(QUEUED)
+  stage              String              @default("queued") @db.VarChar(16)
   idempotencyKey     String              @db.VarChar(128)
   requestHash        String              @db.Char(64)
   modelVersion       String?             @db.VarChar(128)
@@ -99,70 +133,80 @@ model ImageJob {
   purgeAttemptCount  Int                 @default(0)
   nextPurgeAt        DateTime?           @db.Timestamptz(6)
   purgedAt           DateTime?           @db.Timestamptz(6)
-  user               User                @relation(fields:[userId], references:[id], onDelete:Restrict)
-  asset              UploadAsset         @relation(fields:[assetId], references:[id], onDelete:Restrict)
+  user               User                @relation(fields: [userId], references: [id], onDelete: Restrict)
+  asset              UploadAsset         @relation(fields: [assetId], references: [id], onDelete: Restrict)
   credits            CreditTransaction[]
   audits             AuditLog[]
-  @@unique([id,userId])
-  @@unique([userId,idempotencyKey])
-  @@index([userId,createdAt])
-  @@index([status,expiresAt])
-  @@index([tombstonedAt,purgedAt])
-  @@index([leaseExpiresAt,status])
-  @@index([nextPurgeAt,purgedAt])
+
+  @@unique([id, userId])
+  @@unique([userId, idempotencyKey])
+  @@index([userId, createdAt])
+  @@index([status, expiresAt])
+  @@index([tombstonedAt, purgedAt])
+  @@index([leaseExpiresAt, status])
+  @@index([nextPurgeAt, purgedAt])
 }
+
 model FilterPreset {
-  id                 String              @id @default(uuid()) @db.Uuid
-  userId             String              @db.Uuid
-  name               String              @db.VarChar(80)
-  manifestVersion    String              @db.VarChar(32)
-  parameters         Json
-  createdAt          DateTime            @default(now()) @db.Timestamptz(6)
-  updatedAt          DateTime            @updatedAt @db.Timestamptz(6)
-  user               User                @relation(fields:[userId], references:[id], onDelete:Restrict)
-  @@unique([userId,name])
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @db.Uuid
+  name            String   @db.VarChar(80)
+  manifestVersion String   @db.VarChar(32)
+  parameters      Json
+  createdAt       DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @db.Timestamptz(6)
+  user            User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, name])
 }
+
 model CreditWallet {
-  userId             String              @id @db.Uuid
-  balance            Int                 @default(0)
-  reserved           Int                 @default(0)
-  version            Int                 @default(0)
-  user               User                @relation(fields:[userId], references:[id], onDelete:Restrict)
+  userId   String @id @db.Uuid
+  balance  Int    @default(0)
+  reserved Int    @default(0)
+  version  Int    @default(0)
+  user     User   @relation(fields: [userId], references: [id], onDelete: Restrict)
 }
+
 model CreditTransaction {
-  id                 String              @id @default(uuid()) @db.Uuid
-  userId             String              @db.Uuid
-  jobId              String?             @db.Uuid
-  kind               CreditKind
-  amount             Int
-  units              Int
-  deduplicationKey   String              @unique @db.VarChar(160)
-  createdAt          DateTime            @default(now()) @db.Timestamptz(6)
-  user               User                @relation(fields:[userId], references:[id], onDelete:Restrict)
-  job                ImageJob?           @relation(fields:[jobId], references:[id], onDelete:Restrict)
-  @@unique([jobId,kind])
-  @@index([userId,createdAt])
+  id               String     @id @default(uuid()) @db.Uuid
+  userId           String     @db.Uuid
+  jobId            String?    @db.Uuid
+  kind             CreditKind
+  amount           Int
+  units            Int
+  deduplicationKey String     @unique @db.VarChar(160)
+  createdAt        DateTime   @default(now()) @db.Timestamptz(6)
+  user             User       @relation(fields: [userId], references: [id], onDelete: Restrict)
+  job              ImageJob?  @relation(fields: [jobId], references: [id], onDelete: Restrict)
+
+  @@unique([jobId, kind])
+  @@index([userId, createdAt])
 }
+
 model AuditLog {
-  id                 String              @id @default(uuid()) @db.Uuid
-  userId             String?             @db.Uuid
-  jobId              String?             @db.Uuid
-  action             String              @db.VarChar(64)
-  requestId          String              @db.Uuid
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String?   @db.Uuid
+  jobId        String?   @db.Uuid
+  action       String    @db.VarChar(64)
+  requestId    String    @db.Uuid
   // Allowlisted safe metadata only; never image bytes, vectors, signed URLs or EXIF.
-  safeMetadata       Json
-  createdAt          DateTime            @default(now()) @db.Timestamptz(6)
-  user               User?               @relation(fields:[userId], references:[id], onDelete:Restrict)
-  job                ImageJob?           @relation(fields:[jobId], references:[id], onDelete:Restrict)
-  @@index([jobId,createdAt])
-  @@index([userId,createdAt])
+  safeMetadata Json
+  createdAt    DateTime  @default(now()) @db.Timestamptz(6)
+  user         User?     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  job          ImageJob? @relation(fields: [jobId], references: [id], onDelete: Restrict)
+
+  @@index([jobId, createdAt])
+  @@index([userId, createdAt])
 }
+
 model OutboxEvent {
-  id                 String              @id @default(uuid()) @db.Uuid
-  aggregateId        String              @db.Uuid
-  eventType          String              @db.VarChar(64)
-  payload            Json
-  createdAt          DateTime            @default(now()) @db.Timestamptz(6)
-  dispatchedAt       DateTime?           @db.Timestamptz(6)
-  @@index([dispatchedAt,createdAt])
+  id           String    @id @default(uuid()) @db.Uuid
+  aggregateId  String    @db.Uuid
+  eventType    String    @db.VarChar(64)
+  payload      Json
+  createdAt    DateTime  @default(now()) @db.Timestamptz(6)
+  dispatchedAt DateTime? @db.Timestamptz(6)
+
+  @@index([dispatchedAt, createdAt])
 }

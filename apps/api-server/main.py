@@ -1,16 +1,21 @@
-"""Executable API contract shell. Inject an implemented Runtime to enable routes.
+"""PortraitLab Faces API.
 
-Default fails closed with503. No fake queue/database/auth/paid success is supplied.
+Routes fail closed with 503 until a Runtime is configured. When DATABASE_URL is set the
+PostgreSQL/S3 runtime in `portraitlab` is wired at startup; no fake success path exists.
 """
 
 from __future__ import annotations
+from contextlib import asynccontextmanager
 from typing import Annotated, Protocol
+import os
 from uuid import UUID, uuid4
-from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
-from fastapi.responses import JSONResponse
+from fastapi import Depends, FastAPI, Header, HTTPException, Path, Query, Request
+from fastapi.responses import JSONResponse, Response
 from fastapi.exceptions import RequestValidationError, ResponseValidationError
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from schemas import (
+    ConsentRequest,
+    ConsentReceipt,
     UploadRequest,
     UploadGrant,
     UploadComplete,
@@ -30,13 +35,33 @@ class Runtime(Protocol):
     async def status(self, owner: UUID, job_id: UUID, wait_seconds: int, after_revision: int) -> JobPayload: ...
     async def cancel(self, owner: UUID, job_id: UUID) -> JobPayload: ...
     async def delete(self, owner: UUID, job_id: UUID) -> DeletionReceipt: ...
+    async def give_consent(self, owner: UUID, body: ConsentRequest) -> ConsentReceipt: ...
+    async def withdraw_consent(self, owner: UUID, consent_id: UUID) -> ConsentReceipt: ...
+    async def media(self, token: str) -> bytes: ...
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    close = None
+    if os.environ.get("DATABASE_URL") and app.state.runtime is None:
+        from portraitlab.config import load_settings
+        from portraitlab.service import build_runtime
+
+        app.state.runtime, close = await build_runtime(load_settings())
+    try:
+        yield
+    finally:
+        if close is not None:
+            await close()
+            app.state.runtime = None
 
 
 app = FastAPI(
     title="PortraitLab Faces API",
     version="2.0.0",
     openapi_version="3.1.0",
-    description="Production design contract; service Runtime repositories are not implemented in this scaffold.",
+    description="Portrait editing API. Portrait routes require a Bearer JWT and return 503 when unconfigured.",
+    lifespan=lifespan,
 )
 app.state.runtime = None
 security = HTTPBearer(auto_error=False)
@@ -159,3 +184,26 @@ async def cancel_job(job_id: UUID, request: Request, who: Annotated[UUID, Depend
 @app.delete("/api/v1/faces/jobs/{job_id}/data", response_model=DeletionReceipt, status_code=202, tags=["faces"])
 async def delete_job_data(job_id: UUID, request: Request, who: Annotated[UUID, Depends(owner)]):
     return await runtime(request).delete(who, job_id)
+
+
+@app.post("/api/v1/consents", response_model=ConsentReceipt, status_code=201, tags=["consent"])
+async def give_consent(body: ConsentRequest, request: Request, who: Annotated[UUID, Depends(owner)]):
+    return await runtime(request).give_consent(who, body)
+
+
+@app.delete("/api/v1/consents/{consent_id}", response_model=ConsentReceipt, tags=["consent"])
+async def withdraw_consent(consent_id: UUID, request: Request, who: Annotated[UUID, Depends(owner)]):
+    # Withdrawal revokes every dependent asset and job immediately; bytes follow via purge.
+    return await runtime(request).withdraw_consent(who, consent_id)
+
+
+@app.get(
+    "/api/v1/media/{token}",
+    tags=["media"],
+    response_class=Response,
+    responses={200: {"content": {"image/png": {}}, "description": "Private result bytes"}},
+)
+async def media(token: Annotated[str, Path(min_length=16, max_length=512)], request: Request):
+    # Capability token (<=15 s) plus a database owner/fence/expiry/tombstone check on every access.
+    data = await runtime(request).media(token)
+    return Response(content=data, media_type="image/png", headers={"Cache-Control": "no-store, max-age=0"})

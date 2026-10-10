@@ -3,6 +3,8 @@ export type FilterId = 'age_young'|'age_teen'|'age_50s'|'age_70s'|'smile_subtle'
 export type JobState = 'queued'|'running'|'succeeded'|'failed'|'cancel_requested'|'canceled'|'expired'|'purged';
 export interface Options { color_hex?: string|null; skin_smoothing?: number|null; makeup?: number|null; }
 export interface TransformRequest { asset_id:string; face_id:string; filter_type:FilterId; intensity:number; preserve_background?:boolean; source_revision:number; candidate_revision:number; options?:Options; }
+export interface ConsentRequest { policy_version:string; purpose:'portrait_editing'; processor_region:'us'|'eu'; }
+export interface ConsentReceipt { consent_receipt_id:string; policy_version:string; purpose:'portrait_editing'; processor_region:'us'|'eu'; accepted_at:string; withdrawn_at?:string|null; }
 export interface UploadRequest { mime_type:'image/jpeg'|'image/png'|'image/heic'; byte_length:number; checksum_sha256:string; consent_receipt_id:string; }
 export interface UploadGrant { asset_id:string; upload_url:string; method:'PUT'; required_headers:Record<string,string>; expires_at:string; absolute_purge_at:string; }
 export interface UploadComplete {checksum_sha256:string}
