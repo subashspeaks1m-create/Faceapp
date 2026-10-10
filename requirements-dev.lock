@@ -47,7 +47,9 @@ click-repl==0.4.1
 cryptography==50.0.2
     # via pyjwt
 fastapi==0.143.0
-    # via -r apps/api-server/requirements.txt
+    # via
+    #   -r apps/api-server/requirements.txt
+    #   -r apps/style-api/requirements.txt
 h11==0.16.0
     # via
     #   httpcore
@@ -55,7 +57,9 @@ h11==0.16.0
 httpcore==1.0.9
     # via httpx
 httpx==0.28.1
-    # via -r requirements-dev.txt
+    # via
+    #   -r apps/style-api/requirements.txt
+    #   -r requirements-dev.txt
 idna==3.20
     # via
     #   anyio
@@ -81,7 +85,9 @@ opentelemetry-api==1.45.1
 packaging==26.3
     # via kombu
 pillow==12.3.0
-    # via -r apps/api-server/requirements.txt
+    # via
+    #   -r apps/api-server/requirements.txt
+    #   -r apps/style-api/requirements.txt
 prompt-toolkit==3.0.53
     # via click-repl
 psycopg==3.3.6
@@ -95,6 +101,7 @@ pycparser==3.11
 pydantic==2.14.0
     # via
     #   -r apps/api-server/requirements.txt
+    #   -r apps/style-api/requirements.txt
     #   fastapi
 pydantic-core==2.50.0
     # via pydantic
@@ -104,6 +111,8 @@ python-dateutil==2.9.0.post0
     # via
     #   botocore
     #   celery
+python-multipart==0.0.20
+    # via -r apps/style-api/requirements.txt
 pyyaml==6.0.2
     # via -r requirements-dev.txt
 redis==6.4.0

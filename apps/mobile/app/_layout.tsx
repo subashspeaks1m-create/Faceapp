@@ -37,6 +37,11 @@ export default function RootLayout() {
           >
             <Stack.Screen name="index" options={{ title: 'PortraitLab' }} />
             <Stack.Screen name="editor" options={{ title: 'Edit' }} />
+            <Stack.Screen name="styles" options={{ title: 'AI Styles' }} />
+            <Stack.Screen name="style/[id]" options={{ title: 'Style' }} />
+            <Stack.Screen name="result" options={{ title: 'Result' }} />
+            <Stack.Screen name="privacy" options={{ title: 'Privacy' }} />
+            <Stack.Screen name="settings" options={{ title: 'Settings' }} />
             <Stack.Screen name="+not-found" options={{ title: 'PortraitLab' }} />
           </Stack>
         </SessionProvider>

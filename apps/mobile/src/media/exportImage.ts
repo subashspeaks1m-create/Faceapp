@@ -27,3 +27,7 @@ export async function shareExport(file: File): Promise<void> {
   if (!(await Sharing.isAvailableAsync())) throw new ExportError('Sharing is not available on this device.');
   await Sharing.shareAsync(file.uri, { mimeType: 'image/jpeg', UTI: 'public.jpeg', dialogTitle: 'Save or share your photo' });
 }
+
+// Native has no separate download: the share sheet offers "Save image".
+export const downloadExport = shareExport;
+export const canDownload = false;

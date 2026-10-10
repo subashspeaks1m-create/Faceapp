@@ -1,6 +1,33 @@
 # PROGRESS
 
-Current phase: **Phase 1, slice 2 (Expo 57 upgrade + on-device editor)**; slice 1 was the backend runtime. Updated 2026-10-10.
+Current phase: **Phase 1, slice 3 (AI Styles: 25 one-tap OpenAI image-edit styles)**; slice 2 was the Expo 57 on-device editor, slice 1 the backend runtime. Updated 2026-10-10.
+
+## Slice 3: AI Styles (docs/ai-styles/)
+
+Owner request (2026-10-10): integrate an AI image API so a user picks one of 25 named styles and gets a real image-to-image result, with a secure backend. Built as a standalone stateless FastAPI service `apps/style-api` (Vercel Python runtime) plus new app screens; `apps/api-server` is unchanged.
+
+| Item | Status |
+|---|---|
+| 25-style catalog with server-only prompts, intensity bands, generated public copy for the app | IV (unit tests, drift test) |
+| OpenAI provider (`POST /v1/images/edits`, default `gpt-image-2`, quality `medium`, JPEG output) | IU: request/response/error mapping tested on a mocked transport only. No real OpenAI call made: no key, and this environment cannot reach api.openai.com (proxy 403) |
+| Validation (magic bytes, decode, pixels, EXIF strip), CORS allowlist, Origin check, error codes, logging without images/IPs/secrets | IV (HTTP tests) |
+| Upstash rate limiter (atomic Lua, fail closed) | IV against local redis-server 7 through a fake Upstash REST endpoint; IU against real Upstash |
+| App screens: home, style browser with search/categories, style detail with strength, consent sheet, progress/cancel, result with Before/After slider, download/share, failure/retry, privacy, settings, quota | IV on web (Playwright e2e, real API + fake OpenAI fixture); IU on phones (type-checked only) |
+| Deployed backend | BLOCKED: needs owner's Vercel project, Upstash database and OpenAI key (Vercel connector here has no permission to create projects) |
+
+Model and docs basis: OpenAI's image docs (via search; direct fetch blocked) say `gpt-image-1.5` shuts down 2026-12-01 and `gpt-image-2` must omit `input_fidelity`. Per-image prices in docs/ai-styles/SETUP_AND_DEPLOYMENT.md are secondary-source estimates.
+
+Commands run for this slice:
+
+| Command | Result |
+|---|---|
+| `make test-style-api` | 48 run, 47 pass, 1 skipped (live OpenAI test, opt-in) |
+| `npm test --workspace=@portraitlab/mobile` | 33 pass (25 editor + 8 AI Styles client/catalog) |
+| `make test` | pass (style API + 53 runtime tests, 25 integration skipped without services + mobile) |
+| `make lint`, `make build` | pass |
+| `npm run build:web` with `EXPO_PUBLIC_STYLE_API_URL` | builds; bundle secret scan clean; scanner verified to fail on a planted key |
+| `npm run e2e` (Chromium 412×915, real style API → fake OpenAI) | pass: 25 styles, search/filter, consent gate (no upload before consent), 200 image/jpeg, quota header, compare views, JPEG download, server rate limit shown, no console errors |
+
 
 ## Environment actually available
 
@@ -70,7 +97,7 @@ Legend: **IV** implemented and verified, **IU** implemented but unverified, **SP
 - IV: Metro bundles for iOS and Android (`expo export`, Hermes bytecode); `expo prebuild` generates both native projects with camera/photo permission strings.
 - IU: Screens: privacy notice, choose photo (system picker), take photo (system camera, permission denied and Open Settings states), editor with Adjust/Looks/Crop/AI tabs, labelled sliders, Before/After toggle and press-and-hold compare, Undo/Redo/Reset, Apply/Discard, full-size JPEG export to the share sheet. Type-checked and bundled; never run on a device or simulator (none available here).
 - IU: Normalization through expo-image-manipulator: orientation applied, >24 MP downscaled with a notice, PNG re-encode drops metadata. EXIF orientation and ICC handling not verified on devices.
-- SPEC: AI tab lists the 12 filters as "Not available yet"; no upload/consent/job flow in the app yet. No face picker. Crop is centered aspect presets only (no free crop/rotate).
+- SPEC: Editor AI tab lists the 12 Phase 1 portrait filters as "Not available yet" (separate from AI Styles, which upload through the style API). No face picker. Crop is centered aspect presets only (no free crop/rotate).
 
 ### G. Admin
 - SPEC: Not started. Still the supplied Next.js shell (type-checks and builds).
@@ -131,6 +158,7 @@ Environment variable names: `PORTRAITLAB_ENV`, `DATABASE_URL`, `REDIS_URL`, `S3_
 
 ## Blockers and next steps (dependency order)
 
+0. AI Styles go-live (owner actions, docs/ai-styles/SETUP_AND_DEPLOYMENT.md): create the OpenAI key and Upstash database, deploy `apps/style-api` on Vercel, then rebuild the web app with `EXPO_PUBLIC_STYLE_API_URL` and run the live test.
 1. Run the app on a device: follow docs/DEVICE_TESTING.md (development build; EAS profiles in apps/mobile/eas.json, not yet run because they need an Expo login).
 2. App side of the cloud flow: consent, upload, face picker, job status, result binding (`src/editor-binding.ts`). Useful only once a model is approved.
 3. Admin (Phase 1 G): OIDC-authenticated, role-checked metadata views.

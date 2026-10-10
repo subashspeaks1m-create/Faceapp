@@ -1,0 +1,322 @@
+{
+  "version": "2026-10-10.1",
+  "categories": [
+    { "id": "retro", "name": "Retro", "summary": "Film stocks and camera looks from past decades." },
+    { "id": "illustration", "name": "Animation & Illustration", "summary": "Drawn, painted and animated renderings." },
+    { "id": "cinematic", "name": "Cinematic & Fantasy", "summary": "Movie lighting and imagined worlds." },
+    { "id": "editorial", "name": "Professional & Editorial", "summary": "Polished portraits for work and occasions." },
+    { "id": "artistic", "name": "Artistic & Lighting", "summary": "Fine-art media and natural light." }
+  ],
+  "prompt_parts": {
+    "task": "Edit the supplied photograph. It shows one or more real people. Restyle the whole image as described below.",
+    "identity": "Keep every person recognisably the same individual: preserve face shape, eye shape and colour, eyebrows, nose, lips, ears, skin tone, freckles, moles and scars, facial hair, apparent age, hairline and hair colour, and their expression. Do not beautify, slim, reshape, lighten or darken skin, change ethnicity, change apparent age or gender, or change body shape.",
+    "composition": "Keep the original framing, camera angle, head pose, body pose, hand positions, clothing silhouette and the position and size of each person in the frame. Keep exactly the same number of people.",
+    "quality": "Produce a clean, coherent, high-detail result with natural anatomy, correctly formed hands and eyes, and consistent lighting across the face and background.",
+    "safety": "Keep the result non-sexual and fully clothed as in the original; do not add revealing clothing or nudity. Do not add text, letters, numbers, logos, watermarks, signatures, borders or frames.",
+    "global_avoid": [
+      "extra people or faces",
+      "duplicated or distorted facial features",
+      "extra or missing fingers",
+      "changed identity or a different face",
+      "text, captions, logos or watermarks",
+      "copyrighted characters or recognisable scenes from films, comics or games"
+    ]
+  },
+  "intensity_bands": [
+    {
+      "min": 0, "max": 25, "label": "Subtle",
+      "instruction": "Apply the style subtly: change mainly colour grading, lighting and surface texture. The result must still read as a photograph of the same scene."
+    },
+    {
+      "min": 26, "max": 50, "label": "Moderate",
+      "instruction": "Apply the style at moderate strength: clearly visible colour, lighting and texture changes, light stylisation of the background, and the face kept close to photographic."
+    },
+    {
+      "min": 51, "max": 75, "label": "Strong",
+      "instruction": "Apply the style strongly: restyle the background, clothing and rendering technique, and stylise the face while keeping it recognisable."
+    },
+    {
+      "min": 76, "max": 100, "label": "Full",
+      "instruction": "Apply the style fully: render the entire image in this style, including the face, while the person stays clearly recognisable."
+    }
+  ],
+  "styles": [
+    {
+      "id": "seventies-film", "number": 1, "name": "70s Retro Film", "category": "retro",
+      "summary": "Warm amber film with grain and soft, faded colour.",
+      "tags": ["vintage", "film", "warm", "1970s"], "default_intensity": 60,
+      "swatch": ["#C8782E", "#E9B872", "#6B4A2B"],
+      "prompt": {
+        "style": "a photograph shot on 1970s colour negative film: warm amber and mustard colour cast, faded lifted blacks, slightly desaturated greens and blues, soft highlight bloom, visible fine film grain and gentle lens softness. Clothing and background colours drift toward period-appropriate browns, oranges and olive tones.",
+        "high_intensity": "Add a faint orange light leak at one edge and slight vignetting.",
+        "avoid": ["modern digital sharpness", "neon colours", "heavy scratches that cover the face"]
+      }
+    },
+    {
+      "id": "eighties-neon", "number": 2, "name": "80s Neon", "category": "retro",
+      "summary": "Magenta and cyan glow with a synth-era backdrop.",
+      "tags": ["neon", "synthwave", "1980s", "glow"], "default_intensity": 65,
+      "swatch": ["#FF3CAC", "#2BD2FF", "#2B1055"],
+      "prompt": {
+        "style": "an 1980s neon portrait: magenta and cyan rim lighting on the face and hair, deep purple shadows, soft haze and glow, a backdrop of a dark grid horizon or blurred neon light shapes, saturated colours and a slight VHS-era softness.",
+        "high_intensity": "Replace the background with a glowing retro grid horizon and a gradient sunset.",
+        "avoid": ["readable neon signs or text", "green skin", "glow covering the eyes"]
+      }
+    },
+    {
+      "id": "nineties-flash", "number": 3, "name": "90s Flash Photograph", "category": "retro",
+      "summary": "Direct on-camera flash, hard shadows, point-and-shoot film.",
+      "tags": ["flash", "1990s", "candid", "film"], "default_intensity": 55,
+      "swatch": ["#F2F2F0", "#2C2C34", "#D9A441"],
+      "prompt": {
+        "style": "a candid 1990s point-and-shoot film photo taken with direct on-camera flash: bright flat light on the face, hard dark shadow just behind the subject, slightly blown highlights on skin, darker falloff in the background, warm consumer-film colours and visible grain.",
+        "high_intensity": "Add slight red-tinged film colour shift and a soft vignette typical of disposable cameras, without red-eye.",
+        "avoid": ["date stamps or any printed numbers", "red-eye", "studio lighting"]
+      }
+    },
+    {
+      "id": "vintage-polaroid", "number": 4, "name": "Vintage Polaroid", "category": "retro",
+      "summary": "Soft instant-film colour with creamy highlights.",
+      "tags": ["instant", "polaroid", "vintage", "pastel"], "default_intensity": 55,
+      "swatch": ["#E8DCC2", "#8FB3A9", "#C98B7A"],
+      "prompt": {
+        "style": "an aged instant-film photograph: soft focus, creamy overexposed highlights, muted teal shadows and pastel colour shifts, low contrast, gentle chemical colour unevenness and fine grain.",
+        "high_intensity": "Stronger fading toward warm yellow and slight colour bleed at the edges of the image, but no white instant-film border.",
+        "avoid": ["white photo border or frame", "handwriting", "torn or damaged paper"]
+      }
+    },
+    {
+      "id": "storybook-anime", "number": 5, "name": "Ghibli-Inspired Storybook", "category": "illustration",
+      "summary": "Hand-painted anime storybook with soft watercolour skies.",
+      "tags": ["anime", "storybook", "hand-drawn", "pastoral"], "default_intensity": 75,
+      "swatch": ["#7FB7BE", "#F3E3B5", "#5C8D4E"],
+      "prompt": {
+        "style": "an original hand-drawn animated-film illustration in a gentle storybook anime manner: clean expressive line art, soft cel shading, warm natural light, lush painted backgrounds with watercolour-like skies, clouds and greenery, and a nostalgic, peaceful mood. Render the person as an original anime character who keeps their own hairstyle, clothing and expression.",
+        "high_intensity": "Repaint the whole background as a detailed hand-painted pastoral or town scene that fits the original setting.",
+        "avoid": ["any existing animated character", "copying a specific film frame or scene", "studio logos", "chibi proportions"]
+      }
+    },
+    {
+      "id": "animated-3d", "number": 6, "name": "3D Animated Character", "category": "illustration",
+      "summary": "Polished 3D feature-animation look with soft lighting.",
+      "tags": ["3d", "cartoon", "animation", "render"], "default_intensity": 75,
+      "swatch": ["#4F9DDE", "#FFC36B", "#E86A5C"],
+      "prompt": {
+        "style": "an original 3D animated feature-film character render: smooth stylised skin shading, slightly enlarged expressive eyes, soft subsurface lighting, clean shapes, gentle global illumination and a softly blurred stylised background.",
+        "high_intensity": "Fully stylise proportions in a friendly animated way while keeping the person's distinctive features.",
+        "avoid": ["any existing animated character", "plastic toy look", "uncanny half-real face", "exaggerated caricature"]
+      }
+    },
+    {
+      "id": "manga-ink", "number": 7, "name": "Manga Ink", "category": "illustration",
+      "summary": "Black-and-white manga line art with screentone shading.",
+      "tags": ["manga", "ink", "black and white", "line art"], "default_intensity": 75,
+      "swatch": ["#111111", "#F5F5F0", "#8A8A8A"],
+      "prompt": {
+        "style": "a black-and-white manga illustration: confident ink line art, screentone dot shading, solid black hair masses with white highlight strands, speed-line or simple tone background, and crisp paper-white highlights.",
+        "high_intensity": "Use dramatic ink contrast and an expressive panel-style background without panel borders.",
+        "avoid": ["speech bubbles or sound-effect lettering", "panel borders", "colour", "any existing manga character"]
+      }
+    },
+    {
+      "id": "comic-book", "number": 8, "name": "Comic Book", "category": "illustration",
+      "summary": "Bold inked outlines, flat colour and halftone texture.",
+      "tags": ["comic", "halftone", "ink", "bold"], "default_intensity": 70,
+      "swatch": ["#E63946", "#FFD166", "#1D3557"],
+      "prompt": {
+        "style": "a western comic-book illustration: bold black ink outlines, dramatic spot blacks, flat saturated colours with Ben-Day halftone dots in midtones, and a dynamic simplified background.",
+        "high_intensity": "Add strong action-style lighting and a graphic burst background.",
+        "avoid": ["speech bubbles or captions", "superhero costumes or logos", "any existing comic character"]
+      }
+    },
+    {
+      "id": "watercolor", "number": 9, "name": "Watercolor Painting", "category": "illustration",
+      "summary": "Loose washes, soft edges and visible paper texture.",
+      "tags": ["watercolor", "painting", "soft", "paper"], "default_intensity": 65,
+      "swatch": ["#9BC1DD", "#F2C6B4", "#A3C9A8"],
+      "prompt": {
+        "style": "a watercolour painting on cold-press paper: transparent layered washes, soft wet-in-wet edges, controlled detail around the eyes and mouth, pigment blooms and white paper showing through in highlights.",
+        "high_intensity": "Let the background dissolve into loose washes and splashes.",
+        "avoid": ["muddy colours", "hard digital outlines", "paint obscuring the eyes"]
+      }
+    },
+    {
+      "id": "oil-painting", "number": 10, "name": "Oil Painting", "category": "illustration",
+      "summary": "Rich classical oil paint with visible brushwork.",
+      "tags": ["oil", "painting", "brushwork", "classic"], "default_intensity": 65,
+      "swatch": ["#5B3A29", "#C89F5D", "#2F4858"],
+      "prompt": {
+        "style": "an oil painting on canvas: rich layered pigments, visible directional brushstrokes, soft blended skin tones, painterly background and subtle canvas texture, with warm studio light.",
+        "high_intensity": "Use bolder impasto strokes and a painterly abstracted background.",
+        "avoid": ["cracked varnish over the face", "gold frame", "museum wall"]
+      }
+    },
+    {
+      "id": "pop-art", "number": 11, "name": "Pop Art", "category": "illustration",
+      "summary": "Flat bright colours, hard shapes and halftone dots.",
+      "tags": ["pop art", "bold", "graphic", "halftone"], "default_intensity": 70,
+      "swatch": ["#FF006E", "#FFBE0B", "#3A86FF"],
+      "prompt": {
+        "style": "a pop-art screen-print portrait: flat bold blocks of saturated colour, simplified graphic shadows, heavy outlines, visible halftone dots and a single bright contrasting background colour.",
+        "high_intensity": "Use unexpected non-natural colour blocks on hair and clothing while keeping skin tone recognisably the person's own.",
+        "avoid": ["grid of repeated faces", "text or speech bubbles", "changing skin to an unnatural colour"]
+      }
+    },
+    {
+      "id": "pixel-art", "number": 12, "name": "Pixel Art", "category": "illustration",
+      "summary": "Retro game pixel art with a limited palette.",
+      "tags": ["pixel", "8-bit", "game", "retro"], "default_intensity": 70,
+      "swatch": ["#3E2C41", "#F4B860", "#4C9A8D"],
+      "prompt": {
+        "style": "detailed high-resolution pixel art in a 16-bit game style: a crisp square pixel grid, a limited harmonious palette, clean dithering in gradients and a simple pixel-art background.",
+        "high_intensity": "Use a coarser pixel grid and a more limited palette while keeping the face readable.",
+        "avoid": ["game UI, health bars or text", "anti-aliased blur", "any existing game character"]
+      }
+    },
+    {
+      "id": "cyberpunk", "number": 13, "name": "Cyberpunk", "category": "cinematic",
+      "summary": "Rain-soaked neon city light in teal and magenta.",
+      "tags": ["cyberpunk", "neon", "sci-fi", "night"], "default_intensity": 70,
+      "swatch": ["#00F5D4", "#F15BB5", "#10002B"],
+      "prompt": {
+        "style": "a cinematic cyberpunk night portrait: teal and magenta neon light on the face, wet reflective surfaces, atmospheric haze, a dense futuristic city backdrop with bokeh lights, high contrast and subtle chromatic aberration.",
+        "high_intensity": "Add subtle tech-wear details to clothing and light rain in the air, without implants on the face.",
+        "avoid": ["readable signs or text", "cybernetic implants on the face", "masks covering the face"]
+      }
+    },
+    {
+      "id": "film-noir", "number": 14, "name": "Film Noir", "category": "cinematic",
+      "summary": "High-contrast black and white with venetian-blind shadows.",
+      "tags": ["noir", "black and white", "dramatic", "1940s"], "default_intensity": 65,
+      "swatch": ["#0D0D0D", "#BFBFBF", "#595959"],
+      "prompt": {
+        "style": "a 1940s film-noir still in black and white: hard low-key key light, deep shadows, slatted venetian-blind shadow patterns across the background, cigarette-smoke-like haze without smoking, silver film grain and dramatic contrast.",
+        "high_intensity": "Restyle clothing and setting toward 1940s detective-film wardrobe and interiors.",
+        "avoid": ["cigarettes", "weapons", "colour", "shadows hiding the eyes completely"]
+      }
+    },
+    {
+      "id": "cinematic-poster", "number": 15, "name": "Cinematic Poster", "category": "cinematic",
+      "summary": "Blockbuster key art lighting and colour, with no text.",
+      "tags": ["poster", "movie", "dramatic", "blockbuster"], "default_intensity": 70,
+      "swatch": ["#0F4C5C", "#E36414", "#1B1B1E"],
+      "prompt": {
+        "style": "a dramatic blockbuster movie key-art image: teal-and-orange colour grade, strong rim light, atmospheric depth with particles and light rays, epic background that fits the original scene, and polished high-end retouching that keeps natural skin texture.",
+        "high_intensity": "Build a larger, more epic environment behind the person in a heroic composition, keeping their pose.",
+        "avoid": ["any title, credits, tagline or text", "studio logos", "weapons", "recognisable film franchises"]
+      }
+    },
+    {
+      "id": "fantasy-elf", "number": 16, "name": "Fantasy Elf", "category": "cinematic",
+      "summary": "High-fantasy elf with pointed ears and enchanted light.",
+      "tags": ["fantasy", "elf", "magic", "forest"], "default_intensity": 70,
+      "swatch": ["#2D6A4F", "#D8F3DC", "#B7A57A"],
+      "prompt": {
+        "style": "a high-fantasy portrait of the person as an elf: gracefully pointed ears, elegant woven fabric and leaf or silver filigree details on clothing, soft magical backlight, floating light motes and an ancient forest or moonlit glade behind them, painted with cinematic realism.",
+        "high_intensity": "Add a delicate circlet and more ornate elven clothing, keeping the face and hair colour unchanged.",
+        "avoid": ["changing face shape or eye colour", "weapons", "any existing film or game character"],
+        "allowed_changes": "Pointed ears and fantasy clothing are expected changes."
+      }
+    },
+    {
+      "id": "fairycore", "number": 17, "name": "Dreamy Fairycore", "category": "cinematic",
+      "summary": "Soft pastel glow, flowers and sparkling light.",
+      "tags": ["fairy", "pastel", "dreamy", "flowers"], "default_intensity": 65,
+      "swatch": ["#F7C6D9", "#C3B1E1", "#BDE0C8"],
+      "prompt": {
+        "style": "a dreamy fairycore portrait: soft pastel palette, diffused glowing light, gentle haze, wildflowers, moss and delicate blossoms around the person, sparkling light particles and a soft-focus enchanted garden background.",
+        "high_intensity": "Add translucent iridescent wings behind the shoulders and a flower crown.",
+        "avoid": ["revealing clothing", "harsh contrast", "childlike costume styling"],
+        "allowed_changes": "Wings and a flower crown are expected changes at high strength."
+      }
+    },
+    {
+      "id": "pro-headshot", "number": 18, "name": "Professional Headshot", "category": "editorial",
+      "summary": "Clean studio headshot with a neutral backdrop.",
+      "tags": ["headshot", "linkedin", "studio", "business"], "default_intensity": 50,
+      "swatch": ["#2F3E46", "#CAD2C5", "#84A98C"],
+      "prompt": {
+        "style": "a professional corporate studio headshot: soft large key light with gentle fill, natural accurate skin tones with real skin texture, a clean neutral grey or soft blurred office background, and crisp focus on the eyes. Tidy stray hairs only lightly.",
+        "high_intensity": "Restyle the outfit as smart business attire in neutral colours, keeping the neckline modest.",
+        "avoid": ["skin smoothing that removes texture", "changing face shape", "teeth whitening beyond natural"]
+      }
+    },
+    {
+      "id": "fashion-editorial", "number": 19, "name": "Fashion Editorial", "category": "editorial",
+      "summary": "High-fashion magazine lighting and styling.",
+      "tags": ["fashion", "editorial", "magazine", "studio"], "default_intensity": 65,
+      "swatch": ["#1A1A1A", "#E0C3A3", "#8E2C48"],
+      "prompt": {
+        "style": "a high-fashion magazine editorial photograph: sculpted directional studio light, refined colour grading, a minimalist seamless or architectural backdrop, couture-inspired styling of the existing outfit and sharp medium-format detail.",
+        "high_intensity": "Restyle the outfit into a striking designer look in a coordinated colour story.",
+        "avoid": ["magazine masthead or cover text", "brand logos", "revealing or sexualised styling"]
+      }
+    },
+    {
+      "id": "wedding-glow", "number": 20, "name": "Wedding Glow", "category": "editorial",
+      "summary": "Soft romantic light with airy, luminous tones.",
+      "tags": ["wedding", "romantic", "soft", "bright"], "default_intensity": 55,
+      "swatch": ["#FFF4E6", "#F1D1C4", "#C9A66B"],
+      "prompt": {
+        "style": "a fine-art wedding photograph: bright airy exposure, soft warm backlight with a gentle glow around the hair, creamy pastel tones, delicate film-like softness and a softly blurred garden or venue background with warm bokeh.",
+        "high_intensity": "Add elegant formal wedding attire and soft floral details in keeping with the person's original style.",
+        "avoid": ["changing the person's cultural attire into a different tradition without reason", "veil covering the face", "text"]
+      }
+    },
+    {
+      "id": "streetwear", "number": 21, "name": "Streetwear Campaign", "category": "editorial",
+      "summary": "Urban campaign shot with bold, gritty contrast.",
+      "tags": ["streetwear", "urban", "campaign", "fashion"], "default_intensity": 65,
+      "swatch": ["#FF5400", "#202020", "#B8B8B8"],
+      "prompt": {
+        "style": "an urban streetwear brand campaign photo: confident hard sunlight or flash, punchy contrast, slightly crushed shadows, a concrete, graffiti-free city or rooftop backdrop, and contemporary oversized streetwear styling of the existing outfit.",
+        "high_intensity": "Restyle the outfit as a bold layered streetwear look with accessories.",
+        "avoid": ["brand logos or text", "graffiti lettering", "weapons"]
+      }
+    },
+    {
+      "id": "renaissance", "number": 22, "name": "Renaissance Portrait", "category": "artistic",
+      "summary": "Old-master painting with soft chiaroscuro.",
+      "tags": ["renaissance", "classical", "painting", "museum"], "default_intensity": 70,
+      "swatch": ["#3D2B1F", "#B08D57", "#1F3A3D"],
+      "prompt": {
+        "style": "an Italian Renaissance oil portrait: soft chiaroscuro modelling, sfumato transitions, warm earth-tone palette, period-appropriate garments of velvet and linen, a dark or distant landscape background and fine craquelure-free glazing.",
+        "high_intensity": "Restyle clothing and hair accessories fully into Renaissance dress while keeping hair colour and hairline.",
+        "avoid": ["religious iconography", "halo", "picture frame", "copying a specific famous painting"]
+      }
+    },
+    {
+      "id": "clay-figure", "number": 23, "name": "Clay Figure", "category": "artistic",
+      "summary": "Handmade stop-motion clay character.",
+      "tags": ["clay", "claymation", "handmade", "3d"], "default_intensity": 75,
+      "swatch": ["#E07A5F", "#F2CC8F", "#81B29A"],
+      "prompt": {
+        "style": "a handmade stop-motion plasticine figure: matte sculpted clay surfaces with subtle fingerprints and tool marks, simplified rounded forms, small bead-like eyes kept in the person's eye colour, a miniature handcrafted set and soft tabletop studio lighting with shallow depth of field.",
+        "high_intensity": "Make the whole scene a miniature clay diorama.",
+        "avoid": ["any existing claymation character", "glossy plastic", "horror or melting features"]
+      }
+    },
+    {
+      "id": "golden-hour", "number": 24, "name": "Golden Hour", "category": "artistic",
+      "summary": "Warm low sunlight with glowing rim light.",
+      "tags": ["sunset", "warm", "natural light", "photo"], "default_intensity": 50,
+      "swatch": ["#F4A261", "#E9C46A", "#6D597A"],
+      "prompt": {
+        "style": "a natural photograph at golden hour: low warm sunlight from behind or to the side, glowing rim light on hair and shoulders, soft lens flare, warm long shadows, gentle haze and creamy background bokeh, with natural skin texture.",
+        "high_intensity": "Move the setting outdoors to a sunlit field, beach or city street that suits the original scene.",
+        "avoid": ["orange skin", "blown-out face", "multiple suns"]
+      }
+    },
+    {
+      "id": "fine-art-mono", "number": 25, "name": "Fine-Art Monochrome", "category": "artistic",
+      "summary": "Gallery black-and-white with rich tonal range.",
+      "tags": ["black and white", "fine art", "monochrome", "gallery"], "default_intensity": 55,
+      "swatch": ["#E6E6E6", "#7A7A7A", "#1C1C1C"],
+      "prompt": {
+        "style": "a fine-art black-and-white portrait print: rich tonal range from deep blacks to delicate highlights, sculpted soft directional light, fine silver-gelatin grain, minimal background and quiet, timeless mood.",
+        "high_intensity": "Use stronger low-key lighting and a deep black background.",
+        "avoid": ["colour tint", "harsh digital contrast", "crushed shadows hiding the eyes"]
+      }
+    }
+  ]
+}

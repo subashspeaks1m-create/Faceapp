@@ -1,0 +1,4 @@
+tests/
+scripts/
+.env*
+!.env.example

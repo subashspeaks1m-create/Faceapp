@@ -39,3 +39,7 @@ Credits reserved transactionally before paid work, settled once; request key reu
 ## Completion evidence
 
 PROGRESS.md lists commands, pass/fail, live vs mock, actual device/GPU/backend versions, model/checkpoint/prompt version, output dimensions/latency/cost, constraints and blockers. Continue reversible work without repetitive approvals. Secret names may be documented, secret values never pasted. Do not claim native/AI/billing tests passed when only package or geometry tests ran.
+
+## AI Styles service (apps/style-api)
+
+Standalone stateless FastAPI service for the 25 one-tap OpenAI image-edit styles; docs in docs/ai-styles/. `styleapi/catalog.json` is the only source of styles and prompts: after editing it run `make style-catalog` (regenerates `apps/mobile/src/styles/catalog.generated.ts`, which must never contain prompt text) and `make test-style-api`. Keep `OPENAI_API_KEY`, Upstash tokens and `RATE_LIMIT_SALT` server-only; the app may contain only `EXPO_PUBLIC_STYLE_API_URL`, and `npm run build:web` scans the bundle for secrets. Production must keep Upstash rate limiting (fail closed), explicit https CORS origins and the `consent=true` check. Provider test doubles stay in `tests/`; there is no fallback or simulated generation. Live OpenAI tests are opt-in (`STYLE_API_LIVE=1`).

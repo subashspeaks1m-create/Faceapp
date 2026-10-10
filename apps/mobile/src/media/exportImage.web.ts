@@ -38,3 +38,14 @@ export async function shareExport(file: ExportedFile): Promise<void> {
   link.click();
   link.remove();
 }
+
+export async function downloadExport(file: ExportedFile): Promise<void> {
+  const link = document.createElement('a');
+  link.href = file.uri;
+  link.download = file.name;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+
+export const canDownload = true;

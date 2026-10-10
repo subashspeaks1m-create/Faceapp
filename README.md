@@ -12,6 +12,10 @@ This is a production-oriented specification and tested scaffold, not a finished 
 - Four required SVGs plus supplementary icons, brand vector sources,8 background SVGs,4 local LUTs, dark UI tokens,12 filter presets, Inter font/license and synthetic portrait/provenance.
 - Expo/Next starter workspaces, local Docker infrastructure/config, test/contract-generation commands, master collection prompt and phased CLAUDE.md.
 
+## AI Styles
+
+One-tap AI restyling into 25 looks (70s Retro Film, Ghibli-Inspired Storybook, Cyberpunk…) through OpenAI's image edit API, served by the standalone `apps/style-api` service and the app's AI Styles screens. Setup, deployment, API, prompts, security and testing: [docs/ai-styles/](docs/ai-styles/README.md). The OpenAI key lives only in the server's environment; the app only knows the API's public URL (`EXPO_PUBLIC_STYLE_API_URL`).
+
 ## Bootstrap
 
 Current implementation status, commands run and blockers live in [PROGRESS.md](PROGRESS.md). Architecture decisions are in [docs/adr](docs/adr).
