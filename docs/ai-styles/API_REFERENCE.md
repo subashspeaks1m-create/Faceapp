@@ -18,7 +18,7 @@ Readiness without secrets.
 }
 ```
 
-`status` is `ok`, `provider_not_configured` (no `OPENAI_API_KEY`) or `misconfigured` (settings refused at startup; check the function logs for the setting name).
+`provider` is `openai` or `gemini` (the app uses it to name the provider in the consent screen). `status` is `ok`, `provider_not_configured` (no key for the selected provider) or `misconfigured` (settings refused at startup; check the function logs for the setting name).
 
 ## GET /api/styles
 
@@ -91,13 +91,13 @@ Every error is JSON:
 | `INVALID_REQUEST` | 400 | no | Not multipart, missing size, bad `intensity` |
 | `CONSENT_REQUIRED` | 400 | no | `consent` is not `true` |
 | `ORIGIN_NOT_ALLOWED` | 403 | no | Browser `Origin` not in `ALLOWED_ORIGINS` |
-| `PROVIDER_NOT_CONFIGURED` | 503 | no | No `OPENAI_API_KEY`, or OpenAI rejected the key (401/403) |
+| `PROVIDER_NOT_CONFIGURED` | 503 | no | No key for the selected provider, or the provider rejected it |
 | `RATE_LIMITED` | 429 | yes | Hourly or daily per-client limit reached |
-| `PROVIDER_TIMEOUT` | 504 | yes | OpenAI did not answer within `PROVIDER_TIMEOUT_SECONDS` |
-| `PROVIDER_REJECTED` | 422 | no | OpenAI's safety system declined the image or request |
-| `PROVIDER_ERROR` | 502 | yes | Other OpenAI or network failure |
-| `INVALID_PROVIDER_RESPONSE` | 502 | yes | OpenAI returned no image or an undecodable one |
-| `GENERATION_UNAVAILABLE` | 503 | yes | Rate limiter unreachable (fail closed), service-wide daily cap reached, OpenAI busy or out of credit (429), or settings refused at startup |
+| `PROVIDER_TIMEOUT` | 504 | yes | The provider did not answer within `PROVIDER_TIMEOUT_SECONDS` |
+| `PROVIDER_REJECTED` | 422 | no | The provider's safety system declined the image or request |
+| `PROVIDER_ERROR` | 502 | yes | Other provider or network failure (including an unknown model ID) |
+| `INVALID_PROVIDER_RESPONSE` | 502 | yes | The provider returned no image or an undecodable one |
+| `GENERATION_UNAVAILABLE` | 503 | yes | Rate limiter unreachable (fail closed), service-wide daily cap reached, provider busy or out of credit (429), or settings refused at startup |
 | `INTERNAL_ERROR` | 500 | yes | Unexpected server error |
 
 The app adds three client-side codes that never come from the server: `NOT_CONNECTED` (no API URL in this build), `NETWORK_ERROR` and `CANCELED`.

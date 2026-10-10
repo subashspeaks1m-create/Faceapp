@@ -1,6 +1,6 @@
 # AI Styles
 
-One-tap AI restyling of a single photo into one of 25 looks (70s Retro Film, Ghibli-Inspired Storybook, Cyberpunk and so on). The person uploads a photo, picks a style, sets a strength from 0 to 100 and gets a real image-to-image result from OpenAI's image edit API, with Before/After compare and download or share.
+One-tap AI restyling of a single photo into one of 25 looks (70s Retro Film, Ghibli-Inspired Storybook, Cyberpunk and so on). The person uploads a photo, picks a style, sets a strength from 0 to 100 and gets a real image-to-image result from OpenAI's image edit API or Google's Gemini API (chosen by server setting), with Before/After compare and download or share.
 
 This folder is the documentation for the feature:
 
@@ -39,7 +39,7 @@ show result, compare, download/share  <-------------  image/jpeg + X-Quota-* hea
 ```
 
 - **One catalog.** `apps/style-api/styleapi/catalog.json` is the only source of styles, categories, intensity bands and prompt text. The app bundles a generated public copy (`apps/mobile/src/styles/catalog.generated.ts`) that has no prompt text; a test fails if it drifts. The server only accepts style IDs from its own catalog.
-- **Provider abstraction.** `styleapi/providers/base.py` defines `ImageEditProvider.edit(EditRequest) -> EditResult`. `OpenAIImageEditProvider` is the only production implementation. A test double lives in `tests/helpers.py` and is never selectable at runtime.
+- **Provider abstraction.** `styleapi/providers/base.py` defines `ImageEditProvider.edit(EditRequest) -> EditResult`. `OpenAIImageEditProvider` and `GeminiImageEditProvider` are the production implementations, selected by `IMAGE_PROVIDER`. A test double lives in `tests/helpers.py` and is never selectable at runtime.
 - **Stateless and synchronous.** One HTTP request does the whole job. OpenAI image edits typically take tens of seconds; Vercel's function limit is 300 s on every plan with Fluid compute, and the provider timeout defaults to 240 s. An async job queue was not needed for this.
 - **Separate from the Phase 1 portrait backend.** `apps/api-server` (PostgreSQL, S3, Celery, credits) is untouched. The style API is a small standalone service so it can be deployed on a serverless host without that infrastructure.
 
@@ -52,7 +52,7 @@ show result, compare, download/share  <-------------  image/jpeg + X-Quota-* hea
 | `apps/style-api/styleapi/app.py` | Routes, CORS, Origin check, request IDs, logging |
 | `apps/style-api/styleapi/images.py` | Upload validation and output checks |
 | `apps/style-api/styleapi/ratelimit.py` | Upstash limiter (and dev-only memory limiter) |
-| `apps/style-api/styleapi/providers/openai_images.py` | OpenAI image edit call and error mapping |
+| `apps/style-api/styleapi/providers/openai_images.py`, `gemini_images.py` | OpenAI and Gemini image edit calls and error mapping |
 | `apps/style-api/api/index.py`, `vercel.json` | Vercel entry point and function settings |
 | `apps/mobile/app/styles.tsx`, `app/style/[id].tsx`, `app/result.tsx`, `app/privacy.tsx`, `app/settings.tsx` | Screens |
 | `apps/mobile/src/styles/client.ts` | Request and response handling, error mapping |
@@ -60,7 +60,7 @@ show result, compare, download/share  <-------------  image/jpeg + X-Quota-* hea
 
 ## Known limitations
 
-- **No live OpenAI call has been made from this project yet.** The build environment cannot reach `api.openai.com`, and no key has been configured. The request format follows OpenAI's published docs and is covered by mocked-transport tests; the first real check is the live test in [TESTING.md](TESTING.md) or the first generation after deployment.
+- **No live provider call has been made from this project yet.** The build environment cannot reach OpenAI or Google's APIs, and no key is configured on a server. Gemini's request format and model ID come from search results about Google's docs, which could not be opened directly. The request format follows OpenAI's published docs and is covered by mocked-transport tests; the first real check is the live test in [TESTING.md](TESTING.md) or the first generation after deployment.
 - **The style API is not deployed yet.** It needs a Vercel project, an Upstash database and an OpenAI key, which only the owner can create. Until then the live web app shows "AI styles are not connected".
 - **Phones are untested.** The native upload path (expo/fetch with an expo-file-system `File`) type-checks and follows Expo's documented FormData support but has not run on a device. The web build was tested end to end in Chromium.
 - **Identity preservation is a prompt instruction, not a guarantee.** gpt-image-2 processes inputs at high fidelity, but strongly stylised looks (Pixel Art, Clay Figure, 3D Animated) will change faces. Results are labelled AI-generated.
@@ -75,6 +75,7 @@ show result, compare, download/share  <-------------  image/jpeg + X-Quota-* hea
 | Component | Use | Licence or terms |
 |---|---|---|
 | OpenAI Images API (`gpt-image-2` by default) | Image generation | OpenAI API terms and usage policies; per-image cost |
+| Google Gemini API (`gemini-3.1-flash-image` by default) | Image generation (alternative) | Gemini API Additional Terms (paid tier required); per-image cost; outputs carry Google's SynthID watermark |
 | Upstash Redis (REST) | Persistent rate-limit counters | Upstash terms; free tier available |
 | Vercel (Python runtime) | Hosting the style API | Vercel terms |
 | FastAPI, Starlette, Pydantic | API framework | MIT |

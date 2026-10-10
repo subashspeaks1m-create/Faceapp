@@ -163,6 +163,12 @@ class AppTest(unittest.TestCase):
         resp = client.post("/api/generate", data=_form(), files={"image": ("p.jpg", image_bytes("JPEG"), "image/jpeg")})
         self.assertError(resp, "GENERATION_UNAVAILABLE", 503)
 
+    def test_gemini_selected_from_settings(self) -> None:
+        app = create_app(make_settings(OPENAI_API_KEY="", GEMINI_API_KEY="gem-test-key"))
+        health = TestClient(app).get("/api/health").json()
+        self.assertEqual((health["status"], health["provider"], health["model"]), ("ok", "gemini", "gemini-3.1-flash-image"))
+        self.assertNotIn("gem-test-key", json.dumps(health))
+
     def test_all_error_codes_have_messages(self) -> None:
         for code in ALL_CODES:
             body = ApiError(code).body("rid")["error"]

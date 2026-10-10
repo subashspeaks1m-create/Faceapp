@@ -10,7 +10,7 @@ const SECTIONS: readonly { title: string; body: readonly string[] }[] = [
     title: 'AI Styles: what is sent',
     body: [
       'Only when you tap Generate, the app uploads one copy of your chosen photo (resized to at most 1536 pixels and re-encoded, which removes location and camera metadata) with the style name and strength.',
-      'The PortraitLab style service checks the photo, then sends it with a style description to OpenAI, which creates the styled image.',
+      'The PortraitLab style service checks the photo, then sends it with a style description to its AI provider, which creates the styled image. The provider is OpenAI or Google (Gemini), depending on how the service is set up; the consent screen names the one in use, and the app asks again if it changes.',
     ],
   },
   {
@@ -18,7 +18,8 @@ const SECTIONS: readonly { title: string; body: readonly string[] }[] = [
     body: [
       'The PortraitLab style service does not save your photo or the result. They exist in memory while the request runs and are discarded when the result is sent back to you. There is no gallery or account.',
       'The service logs a random request ID, the style, timing and an error code if something fails. It does not log images or your IP address. To apply usage limits it stores a one-way hashed form of your IP address with counters that expire within a day.',
-      'OpenAI processes the photo under its API terms. OpenAI states that API data is not used to train its models by default and that it may keep request data for up to 30 days to detect abuse.',
+      'OpenAI processes photos under its API terms: API data is not used to train its models by default, and request data may be kept for up to 30 days to detect abuse.',
+      'Google processes photos under the Gemini API terms for paid accounts: requests are not used to improve Google products and are logged for a limited time to detect abuse. The service is only allowed to use Gemini with a paid account.',
       'The result stays on your device until you close or reset the app, unless you save or share it.',
     ],
   },

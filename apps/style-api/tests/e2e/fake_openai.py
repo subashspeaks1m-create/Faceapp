@@ -1,4 +1,5 @@
-"""TEST FIXTURE ONLY: a local stand-in for OpenAI's /v1/images/edits used by the browser e2e test.
+"""TEST FIXTURE ONLY: local stand-ins for OpenAI's /v1/images/edits and Gemini's generateContent,
+used by the browser e2e test.
 
 It is never imported by the app. It returns the uploaded photo sepia-toned and resized to the
 requested size so a test can see that the real request path ran end to end. It is not an AI result.
@@ -38,6 +39,26 @@ async def edits(request: Request) -> JSONResponse:
     out = io.BytesIO()
     toned.save(out, format="JPEG", quality=85)
     return JSONResponse({"created": 0, "data": [{"b64_json": base64.b64encode(out.getvalue()).decode()}], "usage": {"input_tokens": 1, "output_tokens": 1}})
+
+
+GEMINI_ASPECT_SIZES = {"1:1": (1024, 1024), "2:3": (832, 1248), "3:2": (1248, 832)}
+
+
+@app.post("/v1beta/models/{model}:generateContent")
+async def gemini(model: str, request: Request) -> JSONResponse:
+    if request.headers.get("x-goog-api-key") != EXPECTED_KEY:
+        return JSONResponse({"error": {"code": 400, "status": "INVALID_ARGUMENT", "details": [{"reason": "API_KEY_INVALID"}]}}, status_code=400)
+    body = await request.json()
+    calls["count"] += 1
+    parts = body["contents"][0]["parts"]
+    raw = base64.b64decode(next(p["inlineData"]["data"] for p in parts if "inlineData" in p))
+    w, h = GEMINI_ASPECT_SIZES[body["generationConfig"]["imageConfig"]["aspectRatio"]]
+    with Image.open(io.BytesIO(raw)) as img:
+        toned = ImageOps.colorize(ImageOps.grayscale(img), "#0e1a2b", "#a4d9f3").resize((w, h))
+    out = io.BytesIO()
+    toned.save(out, format="PNG")
+    image_part = {"inlineData": {"mimeType": "image/png", "data": base64.b64encode(out.getvalue()).decode()}}
+    return JSONResponse({"candidates": [{"content": {"role": "model", "parts": [image_part]}, "finishReason": "STOP"}], "usageMetadata": {"promptTokenCount": 1, "candidatesTokenCount": 1}})
 
 
 @app.get("/calls")

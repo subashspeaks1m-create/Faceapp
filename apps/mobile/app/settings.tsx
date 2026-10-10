@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AI_CONSENT_VERSION, useSession } from '../src/session';
 import { CATALOG } from '../src/styles/catalog';
-import { fetchHealth, fetchQuota, type Health, isStyleError, type StyleError } from '../src/styles/client';
+import { fetchHealth, fetchQuota, type Health, isStyleError, providerInfo, type StyleError } from '../src/styles/client';
 import { STYLE_API_URL } from '../src/styles/config';
 import { styleFetch } from '../src/styles/upload';
 import { Button } from '../src/ui/Button';
@@ -12,7 +12,7 @@ import { colors, radii, space, type } from '../src/ui/theme';
 
 export default function Settings() {
   const router = useRouter();
-  const { aiConsent, withdrawAiConsent, source, result, setSource, setResult, quota, setQuota } = useSession();
+  const { aiConsentProvider, withdrawAiConsent, source, result, setSource, setResult, quota, setQuota } = useSession();
   const [health, setHealth] = useState<Health | StyleError | null>(null);
   const [cleared, setCleared] = useState(false);
 
@@ -30,7 +30,7 @@ export default function Settings() {
   const status =
     health === null ? 'Checking…'
     : isStyleError(health) ? health.message
-    : health.providerConfigured ? 'Connected and ready.'
+    : health.providerConfigured ? `Connected and ready (images by ${providerInfo(health.provider).label}).`
     : 'Connected, but the AI provider is not set up on the server yet.';
 
   return (
@@ -47,9 +47,9 @@ export default function Settings() {
       <View style={styles.card}>
         <Text accessibilityRole="header" style={styles.h2}>Consent</Text>
         <Text style={styles.body}>
-          {aiConsent ? `You agreed to send photos for AI styling (terms version ${AI_CONSENT_VERSION}).` : 'You have not agreed to send photos for AI styling. The app asks before the first upload.'}
+          {aiConsentProvider !== null ? `You agreed to send photos to ${providerInfo(aiConsentProvider).label} for AI styling (terms version ${AI_CONSENT_VERSION}).` : 'You have not agreed to send photos for AI styling. The app asks before the first upload.'}
         </Text>
-        {aiConsent && <Button label="Withdraw AI consent" onPress={withdrawAiConsent} />}
+        {aiConsentProvider !== null && <Button label="Withdraw AI consent" onPress={withdrawAiConsent} />}
       </View>
 
       <View style={styles.card}>

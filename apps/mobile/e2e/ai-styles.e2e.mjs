@@ -59,6 +59,9 @@ try {
 
   // Consent is required before the first upload; nothing has been sent yet.
   assert.equal(requests.filter((r) => r.url().includes('/api/generate')).length, 0);
+  if (process.env.EXPECT_PROVIDER_LABEL) {
+    await page.getByText(new RegExp(`processed by ${process.env.EXPECT_PROVIDER_LABEL.replace(/[()]/g, '\\$&')}`)).filter({ visible: true }).waitFor();
+  }
   const agree = page.getByRole('button', { name: 'Agree and continue' });
   assert.equal(await agree.isDisabled(), true);
   for (const box of await page.getByRole('checkbox').all()) await box.click();

@@ -13,7 +13,8 @@ Owner request (2026-10-10): integrate an AI image API so a user picks one of 25 
 | Validation (magic bytes, decode, pixels, EXIF strip), CORS allowlist, Origin check, error codes, logging without images/IPs/secrets | IV (HTTP tests) |
 | Upstash rate limiter (atomic Lua, fail closed) | IV against local redis-server 7 through a fake Upstash REST endpoint; IU against real Upstash |
 | App screens: home, style browser with search/categories, style detail with strength, consent sheet, progress/cancel, result with Before/After slider, download/share, failure/retry, privacy, settings, quota | IV on web (Playwright e2e, real API + fake OpenAI fixture); IU on phones (type-checked only) |
-| Deployed backend | BLOCKED: needs owner's Vercel project, Upstash database and OpenAI key (Vercel connector here has no permission to create projects) |
+| Gemini provider (`models/{model}:generateContent`, default `gemini-3.1-flash-image`), chosen by `IMAGE_PROVIDER`; production refuses Gemini unless `GEMINI_PAID_TIER=true`; consent names the server's provider | IU: request/response/error mapping tested on a mocked transport and through the browser e2e against a fake Gemini endpoint. No real Gemini call made (this environment cannot reach Google's API). Request format and model ID come from search results about Google's docs; Google lists the default model as deprecated 2026-10-06, so set `GEMINI_IMAGE_MODEL` to the current one at deploy time |
+| Deployed backend | BLOCKED: needs owner's Vercel project, Upstash database and an OpenAI or billing-enabled Gemini key (Vercel connector here has no permission to create projects) |
 
 Model and docs basis: OpenAI's image docs (via search; direct fetch blocked) say `gpt-image-1.5` shuts down 2026-12-01 and `gpt-image-2` must omit `input_fidelity`. Per-image prices in docs/ai-styles/SETUP_AND_DEPLOYMENT.md are secondary-source estimates.
 
@@ -21,12 +22,12 @@ Commands run for this slice:
 
 | Command | Result |
 |---|---|
-| `make test-style-api` | 48 run, 47 pass, 1 skipped (live OpenAI test, opt-in) |
-| `npm test --workspace=@portraitlab/mobile` | 33 pass (25 editor + 8 AI Styles client/catalog) |
+| `make test-style-api` | 59 run, 58 pass, 1 skipped (live provider test, opt-in) |
+| `npm test --workspace=@portraitlab/mobile` | 34 pass (25 editor + 9 AI Styles client/catalog) |
 | `make test` | pass (style API + 53 runtime tests, 25 integration skipped without services + mobile) |
 | `make lint`, `make build` | pass |
 | `npm run build:web` with `EXPO_PUBLIC_STYLE_API_URL` | builds; bundle secret scan clean; scanner verified to fail on a planted key |
-| `npm run e2e` (Chromium 412×915, real style API → fake OpenAI) | pass: 25 styles, search/filter, consent gate (no upload before consent), 200 image/jpeg, quota header, compare views, JPEG download, server rate limit shown, no console errors |
+| `npm run e2e` (Chromium 412×915, real style API → fake OpenAI, and again → fake Gemini) | pass in both modes, consent text names the provider: 25 styles, search/filter, consent gate (no upload before consent), 200 image/jpeg, quota header, compare views, JPEG download, server rate limit shown, no console errors |
 
 
 ## Environment actually available

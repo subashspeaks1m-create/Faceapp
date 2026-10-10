@@ -21,7 +21,7 @@ from .catalog import Catalog, build_prompt, load_catalog, public_catalog
 from .config import ConfigError, Settings, load_settings
 from .errors import ApiError
 from .images import finalize_output, prepare_upload
-from .providers import EditRequest, ImageEditProvider, OpenAIImageEditProvider
+from .providers import EditRequest, GeminiImageEditProvider, ImageEditProvider, OpenAIImageEditProvider
 from .ratelimit import Quota, RateLimiter, client_id_from, make_limiter
 
 log = logging.getLogger("styleapi")
@@ -57,6 +57,28 @@ def _quota_headers(q: Quota) -> dict[str, str]:
     return {"X-Quota-Remaining": str(q.remaining), "X-Quota-Limit": str(q.limit), "X-Quota-Window": q.window}
 
 
+def _make_provider(settings: Settings) -> ImageEditProvider | None:
+    """The provider named by IMAGE_PROVIDER, or None when its key is missing (PROVIDER_NOT_CONFIGURED)."""
+    if settings.image_provider == "gemini":
+        if settings.gemini_api_key is None:
+            return None
+        return GeminiImageEditProvider(
+            settings.gemini_api_key.get_secret_value(),
+            model=settings.gemini_model,
+            base_url=settings.gemini_base_url,
+            timeout_seconds=settings.provider_timeout_seconds,
+        )
+    if settings.openai_api_key is None:
+        return None
+    return OpenAIImageEditProvider(
+        settings.openai_api_key.get_secret_value(),
+        model=settings.openai_model,
+        quality=settings.openai_quality,
+        base_url=settings.openai_base_url,
+        timeout_seconds=settings.provider_timeout_seconds,
+    )
+
+
 def create_app(
     settings: Settings | None = None,
     *,
@@ -71,14 +93,8 @@ def create_app(
             config_error = str(e)
             log.error("config_error %s", config_error)
 
-    if settings is not None and provider is None and settings.openai_api_key is not None:
-        provider = OpenAIImageEditProvider(
-            settings.openai_api_key.get_secret_value(),
-            model=settings.openai_model,
-            quality=settings.openai_quality,
-            base_url=settings.openai_base_url,
-            timeout_seconds=settings.provider_timeout_seconds,
-        )
+    if settings is not None and provider is None:
+        provider = _make_provider(settings)
     if settings is not None and limiter is None:
         limiter = make_limiter(settings)
 
@@ -148,7 +164,7 @@ def create_app(
             "status": "ok" if ready else ("misconfigured" if s is None else "provider_not_configured"),
             "provider_configured": state.provider is not None,
             "provider": getattr(state.provider, "name", None),
-            "model": s.openai_model if s is not None and state.provider is not None else None,
+            "model": s.active_model if s is not None and state.provider is not None else None,
             "rate_limit_backend": s.rate_limit_backend if s is not None else None,
             "catalog_version": state.catalog.version,
             "style_count": len(state.catalog.styles),

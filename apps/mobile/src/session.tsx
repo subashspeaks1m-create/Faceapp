@@ -7,7 +7,7 @@ import type { Quota } from './styles/client';
 // Version of the on-device privacy notice the user acknowledged.
 export const PRIVACY_NOTICE_VERSION = '2026-10-10.2';
 // Version of the consent to send a photo to the AI style service.
-export const AI_CONSENT_VERSION = '2026-10-10.1';
+export const AI_CONSENT_VERSION = '2026-10-10.2';
 const ACK_FILE = 'privacy-ack.json';
 const AI_CONSENT_FILE = 'ai-consent.json';
 
@@ -28,8 +28,9 @@ interface Session {
   readonly setSource: (s: SourceImage | null) => void;
   readonly privacyAcknowledged: boolean;
   readonly acknowledgePrivacy: () => void;
-  readonly aiConsent: boolean;
-  readonly grantAiConsent: () => void;
+  /** Provider the person agreed to send photos to, or null. Consent is asked again if it changes. */
+  readonly aiConsentProvider: string | null;
+  readonly grantAiConsent: (provider: string) => void;
   readonly withdrawAiConsent: () => void;
   readonly result: StyleResult | null;
   readonly setResult: (r: StyleResult | null) => void;
@@ -71,6 +72,19 @@ function readVersion(name: string, version: string): boolean {
   }
 }
 
+function readConsentProvider(): string | null {
+  try {
+    const stored = readStored(AI_CONSENT_FILE);
+    if (stored === null) return null;
+    const parsed: unknown = JSON.parse(stored);
+    if (typeof parsed !== 'object' || parsed === null) return null;
+    const { version, provider } = parsed as { version?: unknown; provider?: unknown };
+    return version === AI_CONSENT_VERSION && typeof provider === 'string' ? provider : null;
+  } catch {
+    return null;
+  }
+}
+
 function persist(name: string, value: string | null): void {
   try {
     writeStored(name, value);
@@ -82,7 +96,7 @@ function persist(name: string, value: string | null): void {
 export function SessionProvider({ children }: { readonly children: ReactNode }) {
   const [source, setSource] = useState<SourceImage | null>(null);
   const [privacyAcknowledged, setAck] = useState(() => readVersion(ACK_FILE, PRIVACY_NOTICE_VERSION));
-  const [aiConsent, setAiConsent] = useState(() => readVersion(AI_CONSENT_FILE, AI_CONSENT_VERSION));
+  const [aiConsentProvider, setAiConsentProvider] = useState<string | null>(readConsentProvider);
   const [result, setResult] = useState<StyleResult | null>(null);
   const [quota, setQuota] = useState<Quota | null>(null);
 
@@ -90,18 +104,18 @@ export function SessionProvider({ children }: { readonly children: ReactNode }) 
     persist(ACK_FILE, JSON.stringify({ version: PRIVACY_NOTICE_VERSION }));
     setAck(true);
   }, []);
-  const grantAiConsent = useCallback(() => {
-    persist(AI_CONSENT_FILE, JSON.stringify({ version: AI_CONSENT_VERSION, at: new Date().toISOString() }));
-    setAiConsent(true);
+  const grantAiConsent = useCallback((provider: string) => {
+    persist(AI_CONSENT_FILE, JSON.stringify({ version: AI_CONSENT_VERSION, provider, at: new Date().toISOString() }));
+    setAiConsentProvider(provider);
   }, []);
   const withdrawAiConsent = useCallback(() => {
     persist(AI_CONSENT_FILE, null);
-    setAiConsent(false);
+    setAiConsentProvider(null);
   }, []);
 
   const value = useMemo(
-    () => ({ source, setSource, privacyAcknowledged, acknowledgePrivacy, aiConsent, grantAiConsent, withdrawAiConsent, result, setResult, quota, setQuota }),
-    [source, privacyAcknowledged, acknowledgePrivacy, aiConsent, grantAiConsent, withdrawAiConsent, result, quota],
+    () => ({ source, setSource, privacyAcknowledged, acknowledgePrivacy, aiConsentProvider, grantAiConsent, withdrawAiConsent, result, setResult, quota, setQuota }),
+    [source, privacyAcknowledged, acknowledgePrivacy, aiConsentProvider, grantAiConsent, withdrawAiConsent, result, quota],
   );
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }

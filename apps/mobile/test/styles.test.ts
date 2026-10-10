@@ -129,3 +129,10 @@ test('quota fetch', async () => {
   const q = await fetchQuota('https://api.example.com', fakeFetch(() => ({ status: 200, body: { remaining: 3, limit: 5, window: 'hour' } })));
   assert.deepEqual(q, { remaining: 3, limit: 5, window: 'hour' });
 });
+
+test('provider info names the provider the server reports', async () => {
+  const { providerInfo } = await import('../src/styles/client.ts');
+  assert.equal(providerInfo('openai').label, 'OpenAI');
+  assert.equal(providerInfo('gemini').label, 'Google (Gemini)');
+  assert.equal(providerInfo(null).label, 'our AI provider');
+});

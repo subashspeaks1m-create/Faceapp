@@ -40,6 +40,31 @@ class ConfigTest(unittest.TestCase):
         assert s.upstash_token is not None
         self.assertEqual(s.upstash_token.get_secret_value(), "t")
 
+    def test_provider_selection(self) -> None:
+        self.assertEqual(load_settings(BASE).image_provider, "openai")
+        self.assertEqual(load_settings({**BASE, "OPENAI_API_KEY": "a", "GEMINI_API_KEY": "b"}).image_provider, "openai")
+        only_gemini = load_settings({**BASE, "GEMINI_API_KEY": "b", "GEMINI_PAID_TIER": "true"})
+        self.assertEqual(only_gemini.image_provider, "gemini")
+        self.assertTrue(only_gemini.provider_configured)
+        self.assertEqual(only_gemini.active_model, "gemini-3.1-flash-image")
+        explicit = load_settings({**BASE, "IMAGE_PROVIDER": "gemini", "OPENAI_API_KEY": "a", "GEMINI_PAID_TIER": "true"})
+        self.assertEqual(explicit.image_provider, "gemini")
+        self.assertFalse(explicit.provider_configured)
+        with self.assertRaises(ConfigError):
+            load_settings({**BASE, "IMAGE_PROVIDER": "digen"})
+        with self.assertRaises(ConfigError):
+            load_settings({**BASE, "GEMINI_IMAGE_MODEL": "../evil"})
+
+    def test_gemini_production_requires_paid_tier(self) -> None:
+        with self.assertRaises(ConfigError):
+            load_settings({**BASE, "GEMINI_API_KEY": "b"})
+        dev = load_settings({"APP_ENV": "development", "RATE_LIMIT_BACKEND": "memory", "GEMINI_API_KEY": "b"})
+        self.assertEqual(dev.image_provider, "gemini")
+
+    def test_gemini_key_not_in_repr(self) -> None:
+        s = load_settings({**BASE, "GEMINI_API_KEY": "gem-secret", "GEMINI_PAID_TIER": "true"})
+        self.assertNotIn("gem-secret", repr(s))
+
     def test_development_allows_http_origin(self) -> None:
         s = load_settings({"APP_ENV": "development", "ALLOWED_ORIGINS": "http://localhost:8081", "RATE_LIMIT_BACKEND": "memory"})
         self.assertEqual(s.allowed_origins, ("http://localhost:8081",))

@@ -1,20 +1,25 @@
 import { useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { providerInfo } from '../styles/client';
 import { Button } from './Button';
 import { colors, radii, space, type } from './theme';
 
 interface Props {
   readonly visible: boolean;
+  /** Provider reported by the server ("openai" | "gemini"); shapes the wording. */
+  readonly provider: string | null;
   readonly onAccept: () => void;
   readonly onCancel: () => void;
   readonly onReadMore: () => void;
 }
 
-const CHECKS = [
-  { id: 'send', text: 'I agree to send this photo to the PortraitLab style service and its AI provider (OpenAI) to create the styled image.' },
-  { id: 'rights', text: 'The photo is of me, or I have permission from everyone in it.' },
-  { id: 'adult', text: 'I am 18 or older, and the photo does not show children.' },
-] as const;
+function checks(label: string) {
+  return [
+    { id: 'send', text: `I agree to send this photo to the PortraitLab style service and ${label} to create the styled image.` },
+    { id: 'rights', text: 'The photo is of me, or I have permission from everyone in it.' },
+    { id: 'adult', text: 'I am 18 or older, and the photo does not show children.' },
+  ] as const;
+}
 
 function Check({ checked, label, onToggle }: { readonly checked: boolean; readonly label: string; readonly onToggle: () => void }) {
   return (
@@ -32,8 +37,10 @@ function Check({ checked, label, onToggle }: { readonly checked: boolean; readon
 }
 
 // Explicit opt-in before the first upload. Nothing is sent until every box is ticked and Agree is tapped.
-export function ConsentSheet({ visible, onAccept, onCancel, onReadMore }: Props) {
+export function ConsentSheet({ visible, provider, onAccept, onCancel, onReadMore }: Props) {
   const [checked, setChecked] = useState<Record<string, boolean>>({});
+  const info = providerInfo(provider);
+  const CHECKS = checks(info.label);
   const all = CHECKS.every((c) => checked[c.id] === true);
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onCancel}>
@@ -42,7 +49,7 @@ export function ConsentSheet({ visible, onAccept, onCancel, onReadMore }: Props)
           <ScrollView contentContainerStyle={styles.content}>
             <Text accessibilityRole="header" style={styles.h2}>Send your photo for AI styling?</Text>
             <Text style={styles.muted}>
-              To create a style, a copy of your photo is uploaded over an encrypted connection and processed by OpenAI. PortraitLab does not keep your photo or the result after sending it back to you. OpenAI may keep request data for up to 30 days to monitor abuse. AI results are artistic interpretations and can change details.
+              To create a style, a copy of your photo is uploaded over an encrypted connection and processed by {info.label}. PortraitLab does not keep your photo or the result after sending it back to you. {info.retention} AI results are artistic interpretations and can change details.
             </Text>
             {CHECKS.map((c) => (
               <Check key={c.id} label={c.text} checked={checked[c.id] === true} onToggle={() => setChecked((p) => ({ ...p, [c.id]: !(p[c.id] === true) }))} />

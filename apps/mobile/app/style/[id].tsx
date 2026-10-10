@@ -4,7 +4,7 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-nat
 import { writeExport } from '../../src/media/exportImage';
 import { useSession } from '../../src/session';
 import { bandFor, categoryName, styleById } from '../../src/styles/catalog';
-import { clientError, errorAdvice, generate, type StyleError } from '../../src/styles/client';
+import { clientError, errorAdvice, fetchHealth, generate, isStyleError, type StyleError } from '../../src/styles/client';
 import { STYLE_API_URL } from '../../src/styles/config';
 import { newForm, prepareImagePart, styleFetch } from '../../src/styles/upload';
 import { Button } from '../../src/ui/Button';
@@ -35,14 +35,24 @@ export default function StyleDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const style = typeof id === 'string' ? styleById(id) : undefined;
-  const { source, setSource, aiConsent, grantAiConsent, setResult, quota, setQuota } = useSession();
+  const { source, setSource, aiConsentProvider, grantAiConsent, setResult, quota, setQuota } = useSession();
   const [intensity, setIntensity] = useState(style?.default_intensity ?? 60);
   const [phase, setPhase] = useState<Phase>({ kind: 'idle' });
   const [consentOpen, setConsentOpen] = useState(false);
   const abort = useRef<AbortController | null>(null);
   const elapsed = useElapsed(phase.kind === 'generating' ? phase.startedAt : null);
 
+  const [provider, setProvider] = useState<string | null>(null);
+
   useEffect(() => () => abort.current?.abort(), []);
+  useEffect(() => {
+    if (STYLE_API_URL === null) return;
+    const ctrl = new AbortController();
+    void fetchHealth(STYLE_API_URL, styleFetch, ctrl.signal).then((h) => {
+      if (!isStyleError(h)) setProvider(h.provider);
+    });
+    return () => ctrl.abort();
+  }, []);
 
   if (style === undefined) {
     return (
@@ -92,8 +102,23 @@ export default function StyleDetail() {
     router.push('/result');
   }
 
-  function onGenerate() {
-    if (!aiConsent) {
+  async function onGenerate() {
+    // Consent names the provider, so it is asked again if the server switches providers.
+    let current = provider;
+    if (current === null && STYLE_API_URL !== null) {
+      const h = await fetchHealth(STYLE_API_URL, styleFetch);
+      if (isStyleError(h)) {
+        setPhase({ kind: 'error', error: h });
+        return;
+      }
+      if (!h.providerConfigured || h.provider === null) {
+        setPhase({ kind: 'error', error: { ...clientError('INTERNAL_ERROR', false), code: 'PROVIDER_NOT_CONFIGURED', message: 'AI styles are not set up on this server yet.' } });
+        return;
+      }
+      current = h.provider;
+      setProvider(current);
+    }
+    if (current === null || aiConsentProvider !== current) {
       setConsentOpen(true);
       return;
     }
@@ -147,7 +172,7 @@ export default function StyleDetail() {
             label={`Generate ${current.name}`}
             variant="primary"
             disabled={source === null || busy || STYLE_API_URL === null}
-            onPress={onGenerate}
+            onPress={() => void onGenerate()}
             hint={source === null ? 'Add a photo first' : 'Sends your photo to create the styled image'}
           />
           <QuotaBadge quota={quota} />
@@ -162,7 +187,7 @@ export default function StyleDetail() {
           {phase.error.retryAfterSeconds !== null && <Text style={styles.muted}>Try again in about {formatWait(phase.error.retryAfterSeconds)}.</Text>}
           {phase.error.requestId !== null && <Text style={styles.caption}>Reference: {phase.error.requestId.slice(0, 12)}</Text>}
           <View style={styles.row}>
-            {(advice.action === 'retry' || phase.error.code === 'CANCELED') && <Button label="Try again" variant="primary" onPress={onGenerate} />}
+            {(advice.action === 'retry' || phase.error.code === 'CANCELED') && <Button label="Try again" variant="primary" onPress={() => void onGenerate()} />}
             <Button label="Choose another style" onPress={() => router.back()} />
           </View>
         </View>
@@ -170,8 +195,9 @@ export default function StyleDetail() {
 
       <ConsentSheet
         visible={consentOpen}
+        provider={provider}
         onAccept={() => {
-          grantAiConsent();
+          if (provider !== null) grantAiConsent(provider);
           setConsentOpen(false);
           void run();
         }}

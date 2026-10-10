@@ -23,6 +23,8 @@ export type GenerateOutcome =
 
 export interface Health {
   readonly providerConfigured: boolean;
+  /** "openai" or "gemini" when configured. */
+  readonly provider: string | null;
   readonly status: string;
   readonly styleCount: number;
 }
@@ -153,6 +155,7 @@ export async function fetchHealth(baseUrl: string | null, fetchImpl: FetchLike, 
     if (!resp.ok) return parseErrorBody(resp.status, body, resp.headers.get('x-request-id'));
     return {
       providerConfigured: body.provider_configured === true,
+      provider: typeof body.provider === 'string' ? body.provider : null,
       status: typeof body.status === 'string' ? body.status : 'unknown',
       styleCount: typeof body.style_count === 'number' ? body.style_count : 0,
     };
@@ -196,5 +199,17 @@ export function errorAdvice(e: StyleError): { readonly title: string; readonly a
       return { title: 'Canceled', action: 'retry' };
     default:
       return { title: 'Generation failed', action: e.retryable ? 'retry' : 'none' };
+  }
+}
+
+// Display name and data-handling summary for the AI provider the server reports.
+export function providerInfo(provider: string | null): { readonly label: string; readonly retention: string } {
+  switch (provider) {
+    case 'openai':
+      return { label: 'OpenAI', retention: 'OpenAI may keep request data for up to 30 days to monitor abuse and does not use it to train models by default.' };
+    case 'gemini':
+      return { label: 'Google (Gemini)', retention: 'Google logs requests for a limited time to detect abuse and, on paid accounts, does not use them to improve its products.' };
+    default:
+      return { label: 'our AI provider', retention: 'The AI provider may keep request data for a limited time to monitor abuse.' };
   }
 }
