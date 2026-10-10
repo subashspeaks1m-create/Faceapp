@@ -1,0 +1,13 @@
+{
+  "name": "@portraitlab/shared-types",
+  "version": "0.0.0",
+  "private": true,
+  "types": "index.ts",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "~5.8.3"
+  }
+}

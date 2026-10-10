@@ -1,0 +1,962 @@
+openapi: 3.1.0
+info:
+  title: PortraitLab Faces API
+  description: Production design contract; service Runtime repositories are not implemented
+    in this scaffold.
+  version: 2.0.0
+paths:
+  /health:
+    get:
+      tags:
+      - health
+      summary: Health
+      operationId: health_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '402':
+          description: Credits required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '409':
+          description: Conflict or idempotency mismatch
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '410':
+          description: Expired or purged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '422':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '429':
+          description: Admission limit
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '500':
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '503':
+          description: Service or filter unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+  /api/v1/faces/upload-url:
+    post:
+      tags:
+      - faces
+      summary: Upload Url
+      operationId: upload_url_api_v1_faces_upload_url_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadRequest'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadGrant'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '402':
+          description: Credits required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '409':
+          description: Conflict or idempotency mismatch
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '410':
+          description: Expired or purged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '422':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '429':
+          description: Admission limit
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '500':
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '503':
+          description: Service or filter unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+      security:
+      - HTTPBearer: []
+  /api/v1/faces/uploads/{asset_id}/complete:
+    post:
+      tags:
+      - faces
+      summary: Complete Upload
+      operationId: complete_upload_api_v1_faces_uploads__asset_id__complete_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: asset_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Asset Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadComplete'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetReceipt'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '402':
+          description: Credits required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '409':
+          description: Conflict or idempotency mismatch
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '410':
+          description: Expired or purged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '422':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '429':
+          description: Admission limit
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '500':
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '503':
+          description: Service or filter unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+  /api/v1/faces/transform:
+    post:
+      tags:
+      - faces
+      summary: Transform
+      operationId: transform_api_v1_faces_transform_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 16
+          maxLength: 128
+          title: Idempotency-Key
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransformRequest'
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobPayload'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '402':
+          description: Credits required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '409':
+          description: Conflict or idempotency mismatch
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '410':
+          description: Expired or purged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '422':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '429':
+          description: Admission limit
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '500':
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '503':
+          description: Service or filter unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+  /api/v1/faces/jobs/{job_id}:
+    get:
+      tags:
+      - faces
+      summary: Job Status
+      operationId: job_status_api_v1_faces_jobs__job_id__get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Job Id
+      - name: wait_seconds
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 25
+          minimum: 0
+          default: 0
+          title: Wait Seconds
+      - name: after_revision
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: After Revision
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobPayload'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '402':
+          description: Credits required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '409':
+          description: Conflict or idempotency mismatch
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '410':
+          description: Expired or purged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '422':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '429':
+          description: Admission limit
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '500':
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '503':
+          description: Service or filter unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+  /api/v1/faces/jobs/{job_id}/cancel:
+    post:
+      tags:
+      - faces
+      summary: Cancel Job
+      operationId: cancel_job_api_v1_faces_jobs__job_id__cancel_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Job Id
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobPayload'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '402':
+          description: Credits required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '409':
+          description: Conflict or idempotency mismatch
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '410':
+          description: Expired or purged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '422':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '429':
+          description: Admission limit
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '500':
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '503':
+          description: Service or filter unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+  /api/v1/faces/jobs/{job_id}/data:
+    delete:
+      tags:
+      - faces
+      summary: Delete Job Data
+      operationId: delete_job_data_api_v1_faces_jobs__job_id__data_delete
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Job Id
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletionReceipt'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '402':
+          description: Credits required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '409':
+          description: Conflict or idempotency mismatch
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '410':
+          description: Expired or purged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '422':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '429':
+          description: Admission limit
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '500':
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+        '503':
+          description: Service or filter unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeError'
+components:
+  schemas:
+    AssetReceipt:
+      properties:
+        asset_id:
+          type: string
+          format: uuid
+          title: Asset Id
+        normalized_width:
+          type: integer
+          maximum: 24000.0
+          minimum: 1.0
+          title: Normalized Width
+        normalized_height:
+          type: integer
+          maximum: 24000.0
+          minimum: 1.0
+          title: Normalized Height
+        faces:
+          items:
+            type: string
+            format: uuid
+          type: array
+          maxItems: 8
+          title: Faces
+        expires_at:
+          type: string
+          format: date-time
+          title: Expires At
+      additionalProperties: false
+      type: object
+      required:
+      - asset_id
+      - normalized_width
+      - normalized_height
+      - faces
+      - expires_at
+      title: AssetReceipt
+    DeletionReceipt:
+      properties:
+        job_id:
+          type: string
+          format: uuid
+          title: Job Id
+        status:
+          type: string
+          enum:
+          - requested
+          - deleting
+          - complete
+          - partial_failure
+          title: Status
+        requested_at:
+          type: string
+          format: date-time
+          title: Requested At
+      additionalProperties: false
+      type: object
+      required:
+      - job_id
+      - status
+      - requested_at
+      title: DeletionReceipt
+    JobPayload:
+      properties:
+        job_id:
+          type: string
+          format: uuid
+          title: Job Id
+        asset_id:
+          type: string
+          format: uuid
+          title: Asset Id
+        face_id:
+          type: string
+          format: uuid
+          title: Face Id
+        source_revision:
+          type: integer
+          minimum: 0.0
+          title: Source Revision
+        candidate_revision:
+          type: integer
+          minimum: 0.0
+          title: Candidate Revision
+        status:
+          type: string
+          enum:
+          - queued
+          - running
+          - succeeded
+          - failed
+          - cancel_requested
+          - canceled
+          - expired
+          - purged
+          title: Status
+        stage:
+          type: string
+          enum:
+          - queued
+          - decode
+          - detect
+          - align
+          - parse
+          - transform
+          - restore
+          - blend
+          - encode
+          - deliver
+          - done
+          title: Stage
+        event_revision:
+          type: integer
+          minimum: 0.0
+          title: Event Revision
+        progress_percent:
+          anyOf:
+          - type: number
+            maximum: 100.0
+            minimum: 0.0
+          - type: 'null'
+          title: Progress Percent
+        progress_source:
+          type: string
+          enum:
+          - indeterminate
+          - measured_steps
+          - complete
+          title: Progress Source
+          default: indeterminate
+        result_cdn_url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Result Cdn Url
+        result_expires_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Result Expires At
+        error:
+          anyOf:
+          - $ref: '#/components/schemas/SafeError'
+          - type: 'null'
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+      additionalProperties: false
+      type: object
+      required:
+      - job_id
+      - asset_id
+      - face_id
+      - source_revision
+      - candidate_revision
+      - status
+      - stage
+      - event_revision
+      - created_at
+      - updated_at
+      title: JobPayload
+    Options:
+      properties:
+        color_hex:
+          anyOf:
+          - type: string
+            pattern: ^#[0-9a-fA-F]{6}$
+          - type: 'null'
+          title: Color Hex
+        skin_smoothing:
+          anyOf:
+          - type: number
+            maximum: 1.0
+            minimum: 0.0
+          - type: 'null'
+          title: Skin Smoothing
+        makeup:
+          anyOf:
+          - type: number
+            maximum: 1.0
+            minimum: 0.0
+          - type: 'null'
+          title: Makeup
+      additionalProperties: false
+      type: object
+      title: Options
+    SafeError:
+      properties:
+        code:
+          type: string
+          title: Code
+        message:
+          type: string
+          title: Message
+        retryable:
+          type: boolean
+          title: Retryable
+        request_id:
+          type: string
+          format: uuid
+          title: Request Id
+      additionalProperties: false
+      type: object
+      required:
+      - code
+      - message
+      - retryable
+      - request_id
+      title: SafeError
+    TransformRequest:
+      properties:
+        asset_id:
+          type: string
+          format: uuid
+          title: Asset Id
+        face_id:
+          type: string
+          format: uuid
+          title: Face Id
+        filter_type:
+          type: string
+          enum:
+          - age_young
+          - age_teen
+          - age_50s
+          - age_70s
+          - smile_subtle
+          - smile_tooth
+          - laugh
+          - gender_feminine
+          - gender_masculine
+          - hair_color
+          - beard_density
+          - beauty_retouch
+          title: Filter Type
+        intensity:
+          type: number
+          maximum: 1.0
+          minimum: 0.0
+          title: Intensity
+        preserve_background:
+          type: boolean
+          title: Preserve Background
+          default: true
+        source_revision:
+          type: integer
+          minimum: 0.0
+          title: Source Revision
+        candidate_revision:
+          type: integer
+          minimum: 0.0
+          title: Candidate Revision
+        options:
+          $ref: '#/components/schemas/Options'
+      additionalProperties: false
+      type: object
+      required:
+      - asset_id
+      - face_id
+      - filter_type
+      - intensity
+      - source_revision
+      - candidate_revision
+      title: TransformRequest
+    UploadComplete:
+      properties:
+        checksum_sha256:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+          title: Checksum Sha256
+      additionalProperties: false
+      type: object
+      required:
+      - checksum_sha256
+      title: UploadComplete
+    UploadGrant:
+      properties:
+        asset_id:
+          type: string
+          format: uuid
+          title: Asset Id
+        upload_url:
+          type: string
+          title: Upload Url
+        method:
+          type: string
+          const: PUT
+          title: Method
+          default: PUT
+        required_headers:
+          additionalProperties:
+            type: string
+          type: object
+          title: Required Headers
+        expires_at:
+          type: string
+          format: date-time
+          title: Expires At
+        absolute_purge_at:
+          type: string
+          format: date-time
+          title: Absolute Purge At
+      additionalProperties: false
+      type: object
+      required:
+      - asset_id
+      - upload_url
+      - required_headers
+      - expires_at
+      - absolute_purge_at
+      title: UploadGrant
+    UploadRequest:
+      properties:
+        mime_type:
+          type: string
+          enum:
+          - image/jpeg
+          - image/png
+          - image/heic
+          title: Mime Type
+        byte_length:
+          type: integer
+          maximum: 10485760.0
+          minimum: 1.0
+          title: Byte Length
+        checksum_sha256:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+          title: Checksum Sha256
+        consent_receipt_id:
+          type: string
+          format: uuid
+          title: Consent Receipt Id
+      additionalProperties: false
+      type: object
+      required:
+      - mime_type
+      - byte_length
+      - checksum_sha256
+      - consent_receipt_id
+      title: UploadRequest
+  securitySchemes:
+    HTTPBearer:
+      type: http
+      scheme: bearer
+servers:
+- url: http://localhost:8000
+  description: Local development
+- url: https://api.example.invalid
+  description: Replace with deployed TLS API

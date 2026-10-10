@@ -1,0 +1,219 @@
+[
+  {
+    "id": "age_young",
+    "display_name": "Young Adult",
+    "category": "age",
+    "icon_reference": "assets/icons/age.svg",
+    "intensity_default": 0.35,
+    "model_route": {
+      "adapter_key": "age.onnx",
+      "parameters": {
+        "target_age": 25
+      },
+      "requires_license_approval": true,
+      "mask_region": "face",
+      "intensity_semantics": "validated_strength_tiers",
+      "checkpoint_sha256": null
+    },
+    "release_status": "blocked_pending_weights_and_benchmark"
+  },
+  {
+    "id": "age_teen",
+    "display_name": "Teen",
+    "category": "age",
+    "icon_reference": "assets/icons/age.svg",
+    "intensity_default": 0.35,
+    "model_route": {
+      "adapter_key": "age.onnx",
+      "parameters": {
+        "target_age": 17
+      },
+      "requires_license_approval": true,
+      "mask_region": "face",
+      "intensity_semantics": "validated_strength_tiers",
+      "checkpoint_sha256": null
+    },
+    "release_status": "blocked_pending_weights_and_benchmark"
+  },
+  {
+    "id": "age_50s",
+    "display_name": "50s",
+    "category": "age",
+    "icon_reference": "assets/icons/age.svg",
+    "intensity_default": 0.35,
+    "model_route": {
+      "adapter_key": "age.onnx",
+      "parameters": {
+        "target_age": 55
+      },
+      "requires_license_approval": true,
+      "mask_region": "face",
+      "intensity_semantics": "validated_strength_tiers",
+      "checkpoint_sha256": null
+    },
+    "release_status": "blocked_pending_weights_and_benchmark"
+  },
+  {
+    "id": "age_70s",
+    "display_name": "70s",
+    "category": "age",
+    "icon_reference": "assets/icons/age.svg",
+    "intensity_default": 0.35,
+    "model_route": {
+      "adapter_key": "age.onnx",
+      "parameters": {
+        "target_age": 75
+      },
+      "requires_license_approval": true,
+      "mask_region": "face",
+      "intensity_semantics": "validated_strength_tiers",
+      "checkpoint_sha256": null
+    },
+    "release_status": "blocked_pending_weights_and_benchmark"
+  },
+  {
+    "id": "smile_subtle",
+    "display_name": "Subtle Smile",
+    "category": "expression",
+    "icon_reference": "assets/icons/smile.svg",
+    "intensity_default": 0.3,
+    "model_route": {
+      "adapter_key": "expression.onnx",
+      "parameters": {
+        "expression": "closed_lip_smile"
+      },
+      "requires_license_approval": true,
+      "mask_region": "face",
+      "intensity_semantics": "validated_strength_tiers",
+      "checkpoint_sha256": null
+    },
+    "release_status": "blocked_pending_weights_and_benchmark"
+  },
+  {
+    "id": "smile_tooth",
+    "display_name": "Tooth Smile",
+    "category": "expression",
+    "icon_reference": "assets/icons/smile.svg",
+    "intensity_default": 0.3,
+    "model_route": {
+      "adapter_key": "expression.onnx",
+      "parameters": {
+        "expression": "tooth_smile"
+      },
+      "requires_license_approval": true,
+      "mask_region": "face",
+      "intensity_semantics": "validated_strength_tiers",
+      "checkpoint_sha256": null
+    },
+    "release_status": "blocked_pending_weights_and_benchmark"
+  },
+  {
+    "id": "laugh",
+    "display_name": "Laugh",
+    "category": "expression",
+    "icon_reference": "assets/icons/smile.svg",
+    "intensity_default": 0.3,
+    "model_route": {
+      "adapter_key": "expression.onnx",
+      "parameters": {
+        "expression": "laugh"
+      },
+      "requires_license_approval": true,
+      "mask_region": "face",
+      "intensity_semantics": "validated_strength_tiers",
+      "checkpoint_sha256": null
+    },
+    "release_status": "blocked_pending_weights_and_benchmark"
+  },
+  {
+    "id": "gender_feminine",
+    "display_name": "Feminine",
+    "category": "presentation",
+    "icon_reference": "assets/icons/face.svg",
+    "intensity_default": 0.3,
+    "model_route": {
+      "adapter_key": "presentation.onnx",
+      "parameters": {
+        "style": "feminine"
+      },
+      "requires_license_approval": true,
+      "mask_region": "face",
+      "intensity_semantics": "validated_strength_tiers",
+      "checkpoint_sha256": null
+    },
+    "release_status": "blocked_pending_weights_and_benchmark"
+  },
+  {
+    "id": "gender_masculine",
+    "display_name": "Masculine",
+    "category": "presentation",
+    "icon_reference": "assets/icons/face.svg",
+    "intensity_default": 0.3,
+    "model_route": {
+      "adapter_key": "presentation.onnx",
+      "parameters": {
+        "style": "masculine"
+      },
+      "requires_license_approval": true,
+      "mask_region": "face",
+      "intensity_semantics": "validated_strength_tiers",
+      "checkpoint_sha256": null
+    },
+    "release_status": "blocked_pending_weights_and_benchmark"
+  },
+  {
+    "id": "hair_color",
+    "display_name": "Hair Color",
+    "category": "style",
+    "icon_reference": "assets/icons/hair-color.svg",
+    "intensity_default": 0.3,
+    "model_route": {
+      "adapter_key": "hair.onnx",
+      "parameters": {
+        "color_hex": "#A15B39"
+      },
+      "requires_license_approval": true,
+      "mask_region": "hair",
+      "intensity_semantics": "validated_continuous",
+      "checkpoint_sha256": null
+    },
+    "release_status": "blocked_pending_weights_and_benchmark"
+  },
+  {
+    "id": "beard_density",
+    "display_name": "Beard Density",
+    "category": "style",
+    "icon_reference": "assets/icons/beard.svg",
+    "intensity_default": 0.3,
+    "model_route": {
+      "adapter_key": "beard.onnx",
+      "parameters": {
+        "density": 0.3
+      },
+      "requires_license_approval": true,
+      "mask_region": "lower_face",
+      "intensity_semantics": "validated_continuous",
+      "checkpoint_sha256": null
+    },
+    "release_status": "blocked_pending_weights_and_benchmark"
+  },
+  {
+    "id": "beauty_retouch",
+    "display_name": "Beauty Retouch",
+    "category": "beauty",
+    "icon_reference": "assets/icons/makeup.svg",
+    "intensity_default": 0.3,
+    "model_route": {
+      "adapter_key": "beauty.compose",
+      "parameters": {
+        "skin_smoothing": 0.4,
+        "makeup": 0.2
+      },
+      "requires_license_approval": true,
+      "mask_region": "skin_and_makeup",
+      "intensity_semantics": "validated_continuous",
+      "checkpoint_sha256": null
+    },
+    "release_status": "blocked_pending_weights_and_benchmark"
+  }
+]

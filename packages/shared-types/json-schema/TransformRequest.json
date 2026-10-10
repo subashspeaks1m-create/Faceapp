@@ -1,0 +1,117 @@
+{
+  "$defs": {
+    "Options": {
+      "additionalProperties": false,
+      "properties": {
+        "color_hex": {
+          "anyOf": [
+            {
+              "pattern": "^#[0-9a-fA-F]{6}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Color Hex"
+        },
+        "skin_smoothing": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Skin Smoothing"
+        },
+        "makeup": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Makeup"
+        }
+      },
+      "title": "Options",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "asset_id": {
+      "format": "uuid",
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "face_id": {
+      "format": "uuid",
+      "title": "Face Id",
+      "type": "string"
+    },
+    "filter_type": {
+      "enum": [
+        "age_young",
+        "age_teen",
+        "age_50s",
+        "age_70s",
+        "smile_subtle",
+        "smile_tooth",
+        "laugh",
+        "gender_feminine",
+        "gender_masculine",
+        "hair_color",
+        "beard_density",
+        "beauty_retouch"
+      ],
+      "title": "Filter Type",
+      "type": "string"
+    },
+    "intensity": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Intensity",
+      "type": "number"
+    },
+    "preserve_background": {
+      "default": true,
+      "title": "Preserve Background",
+      "type": "boolean"
+    },
+    "source_revision": {
+      "minimum": 0,
+      "title": "Source Revision",
+      "type": "integer"
+    },
+    "candidate_revision": {
+      "minimum": 0,
+      "title": "Candidate Revision",
+      "type": "integer"
+    },
+    "options": {
+      "$ref": "#/$defs/Options"
+    }
+  },
+  "required": [
+    "asset_id",
+    "face_id",
+    "filter_type",
+    "intensity",
+    "source_revision",
+    "candidate_revision"
+  ],
+  "title": "TransformRequest",
+  "type": "object"
+}

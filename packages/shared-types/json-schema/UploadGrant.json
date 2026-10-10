@@ -1,0 +1,46 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "asset_id": {
+      "format": "uuid",
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "upload_url": {
+      "title": "Upload Url",
+      "type": "string"
+    },
+    "method": {
+      "const": "PUT",
+      "default": "PUT",
+      "title": "Method",
+      "type": "string"
+    },
+    "required_headers": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Required Headers",
+      "type": "object"
+    },
+    "expires_at": {
+      "format": "date-time",
+      "title": "Expires At",
+      "type": "string"
+    },
+    "absolute_purge_at": {
+      "format": "date-time",
+      "title": "Absolute Purge At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "asset_id",
+    "upload_url",
+    "required_headers",
+    "expires_at",
+    "absolute_purge_at"
+  ],
+  "title": "UploadGrant",
+  "type": "object"
+}

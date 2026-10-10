@@ -1,0 +1,182 @@
+{
+  "$defs": {
+    "SafeError": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "retryable": {
+          "title": "Retryable",
+          "type": "boolean"
+        },
+        "request_id": {
+          "format": "uuid",
+          "title": "Request Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "retryable",
+        "request_id"
+      ],
+      "title": "SafeError",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "job_id": {
+      "format": "uuid",
+      "title": "Job Id",
+      "type": "string"
+    },
+    "asset_id": {
+      "format": "uuid",
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "face_id": {
+      "format": "uuid",
+      "title": "Face Id",
+      "type": "string"
+    },
+    "source_revision": {
+      "minimum": 0,
+      "title": "Source Revision",
+      "type": "integer"
+    },
+    "candidate_revision": {
+      "minimum": 0,
+      "title": "Candidate Revision",
+      "type": "integer"
+    },
+    "status": {
+      "enum": [
+        "queued",
+        "running",
+        "succeeded",
+        "failed",
+        "cancel_requested",
+        "canceled",
+        "expired",
+        "purged"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "stage": {
+      "enum": [
+        "queued",
+        "decode",
+        "detect",
+        "align",
+        "parse",
+        "transform",
+        "restore",
+        "blend",
+        "encode",
+        "deliver",
+        "done"
+      ],
+      "title": "Stage",
+      "type": "string"
+    },
+    "event_revision": {
+      "minimum": 0,
+      "title": "Event Revision",
+      "type": "integer"
+    },
+    "progress_percent": {
+      "anyOf": [
+        {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Progress Percent"
+    },
+    "progress_source": {
+      "default": "indeterminate",
+      "enum": [
+        "indeterminate",
+        "measured_steps",
+        "complete"
+      ],
+      "title": "Progress Source",
+      "type": "string"
+    },
+    "result_cdn_url": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Result Cdn Url"
+    },
+    "result_expires_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Result Expires At"
+    },
+    "error": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SafeError"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "job_id",
+    "asset_id",
+    "face_id",
+    "source_revision",
+    "candidate_revision",
+    "status",
+    "stage",
+    "event_revision",
+    "created_at",
+    "updated_at"
+  ],
+  "title": "JobPayload",
+  "type": "object"
+}

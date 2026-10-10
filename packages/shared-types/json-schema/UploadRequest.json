@@ -1,0 +1,38 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "mime_type": {
+      "enum": [
+        "image/jpeg",
+        "image/png",
+        "image/heic"
+      ],
+      "title": "Mime Type",
+      "type": "string"
+    },
+    "byte_length": {
+      "maximum": 10485760,
+      "minimum": 1,
+      "title": "Byte Length",
+      "type": "integer"
+    },
+    "checksum_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Checksum Sha256",
+      "type": "string"
+    },
+    "consent_receipt_id": {
+      "format": "uuid",
+      "title": "Consent Receipt Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "mime_type",
+    "byte_length",
+    "checksum_sha256",
+    "consent_receipt_id"
+  ],
+  "title": "UploadRequest",
+  "type": "object"
+}

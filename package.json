@@ -1,0 +1,16 @@
+{
+  "name": "portraitlab-production-scaffold",
+  "private": true,
+  "workspaces": [
+    "apps/mobile",
+    "apps/web-admin",
+    "packages/shared-types"
+  ],
+  "scripts": {
+    "build": "make build",
+    "test": "make test",
+    "dev": "make dev",
+    "lint": "make lint",
+    "docker:up": "make docker-up"
+  }
+}
