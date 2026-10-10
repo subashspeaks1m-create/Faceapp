@@ -33,7 +33,7 @@ export default function Styles() {
     <ScrollView contentContainerStyle={styles.page} keyboardShouldPersistTaps="handled">
       {STYLE_API_URL === null && (
         <View style={styles.notice} accessibilityRole="alert">
-          <Text style={styles.body}>AI styles are not connected in this version of the app yet. You can browse the styles, but generating needs the style service to be set up.</Text>
+          <Text style={styles.body}>AI styles are switched off for now, so you can look through them but not create images yet. The free photo editor on the home screen works.</Text>
         </View>
       )}
       <SourceStrip source={source} onPicked={setSource} />

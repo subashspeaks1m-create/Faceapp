@@ -165,17 +165,30 @@ export default function StyleDetail() {
         </View>
       ) : (
         <>
-          {STYLE_API_URL === null && (
-            <Text style={styles.muted} accessibilityRole="alert">AI styles are not connected in this version of the app yet, so generating is turned off.</Text>
+          {STYLE_API_URL === null ? (
+            <View style={styles.card} accessibilityRole="alert" testID="styles-offline">
+              <Text style={styles.h2}>AI styles are switched off for now</Text>
+              <Text style={styles.body}>
+                This version of PortraitLab isn't linked to the AI service yet, so it can't create {current.name} images. Nothing has been uploaded.
+              </Text>
+              <Text style={styles.muted}>Meanwhile you can edit this photo with the free tools: light, colour, looks and crop, all on your device.</Text>
+              <View style={styles.row}>
+                {source !== null && <Button label="Edit this photo instead" variant="primary" onPress={() => router.push('/editor')} />}
+                <Button label="Back to styles" onPress={() => router.back()} />
+              </View>
+            </View>
+          ) : (
+            <>
+              <Button
+                label={`Generate ${current.name}`}
+                variant="primary"
+                disabled={source === null || busy}
+                onPress={() => void onGenerate()}
+                hint={source === null ? 'Add a photo first' : 'Sends your photo to create the styled image'}
+              />
+              <QuotaBadge quota={quota} />
+            </>
           )}
-          <Button
-            label={`Generate ${current.name}`}
-            variant="primary"
-            disabled={source === null || busy || STYLE_API_URL === null}
-            onPress={() => void onGenerate()}
-            hint={source === null ? 'Add a photo first' : 'Sends your photo to create the styled image'}
-          />
-          <QuotaBadge quota={quota} />
         </>
       )}
 

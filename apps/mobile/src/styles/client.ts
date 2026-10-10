@@ -38,7 +38,7 @@ export type FetchLike = (url: string, init: { method: string; body?: unknown; si
 }>;
 
 const MESSAGES: Record<'NOT_CONNECTED' | 'NETWORK_ERROR' | 'CANCELED' | 'INVALID_PROVIDER_RESPONSE' | 'INTERNAL_ERROR', string> = {
-  NOT_CONNECTED: 'AI styles are not connected in this version of the app yet.',
+  NOT_CONNECTED: 'AI styles are switched off for now.',
   NETWORK_ERROR: 'Could not reach the style service. Check your connection and try again.',
   CANCELED: 'Generation was canceled.',
   INVALID_PROVIDER_RESPONSE: 'The service returned an unusable image. Try again.',
