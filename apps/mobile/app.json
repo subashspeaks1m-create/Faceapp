@@ -23,6 +23,10 @@
           "microphonePermission": false
         }
       ]
-    ]
+    ],
+    "web": {
+      "output": "single",
+      "bundler": "metro"
+    }
   }
 }

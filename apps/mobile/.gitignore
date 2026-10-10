@@ -3,3 +3,4 @@
 /ios
 .expo/
 dist/
+/public/canvaskit.wasm

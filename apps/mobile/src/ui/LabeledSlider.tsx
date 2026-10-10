@@ -11,6 +11,7 @@ interface Props {
 }
 
 // Shows the value as a signed percentage so every slider is labelled numerically.
+// The control itself runs from 0 to (max - min): the web slider mishandles negative minimums.
 export function formatValue(value: number, min: number): string {
   const pct = Math.round(value * 100);
   return min < 0 && pct > 0 ? `+${pct}` : `${pct}`;
@@ -27,11 +28,11 @@ export function LabeledSlider({ label, value, min, max, onChange }: Props) {
       <Slider
         accessibilityLabel={label}
         accessibilityValue={{ min: Math.round(min * 100), max: Math.round(max * 100), now: Math.round(value * 100), text }}
-        minimumValue={min}
-        maximumValue={max}
+        minimumValue={0}
+        maximumValue={max - min}
         step={0.01}
-        value={value}
-        onValueChange={onChange}
+        value={value - min}
+        onValueChange={(v) => onChange(Math.round((v + min) * 100) / 100)}
         minimumTrackTintColor={colors.accent}
         maximumTrackTintColor={colors.border}
         thumbTintColor={colors.text}

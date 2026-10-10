@@ -1,5 +1,6 @@
 import { File, Paths } from 'expo-file-system';
 import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from 'react';
+import { Platform } from 'react-native';
 import type { SourceImage } from './media/normalize';
 
 // Version of the on-device privacy notice the user acknowledged.
@@ -15,11 +16,27 @@ interface Session {
 
 const SessionContext = createContext<Session | null>(null);
 
+function readStored(): string | null {
+  if (Platform.OS === 'web') return globalThis.localStorage?.getItem(ACK_FILE) ?? null;
+  const file = new File(Paths.document, ACK_FILE);
+  return file.exists ? file.textSync() : null;
+}
+
+function writeStored(value: string): void {
+  if (Platform.OS === 'web') {
+    globalThis.localStorage?.setItem(ACK_FILE, value);
+    return;
+  }
+  const file = new File(Paths.document, ACK_FILE);
+  if (!file.exists) file.create();
+  file.write(value);
+}
+
 function readAck(): boolean {
   try {
-    const file = new File(Paths.document, ACK_FILE);
-    if (!file.exists) return false;
-    const parsed: unknown = JSON.parse(file.textSync());
+    const stored = readStored();
+    if (stored === null) return false;
+    const parsed: unknown = JSON.parse(stored);
     return typeof parsed === 'object' && parsed !== null && (parsed as { version?: unknown }).version === PRIVACY_NOTICE_VERSION;
   } catch {
     return false;
@@ -31,9 +48,7 @@ export function SessionProvider({ children }: { readonly children: ReactNode }) 
   const [privacyAcknowledged, setAck] = useState(readAck);
   const acknowledgePrivacy = useCallback(() => {
     try {
-      const file = new File(Paths.document, ACK_FILE);
-      if (!file.exists) file.create();
-      file.write(JSON.stringify({ version: PRIVACY_NOTICE_VERSION }));
+      writeStored(JSON.stringify({ version: PRIVACY_NOTICE_VERSION }));
     } catch {
       // Acknowledgement still holds for this session; it is asked again next launch.
     }
