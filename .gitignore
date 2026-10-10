@@ -1,0 +1,27 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.ruff_cache/
+.pytest_cache/
+
+# JavaScript
+node_modules/
+.next/
+.expo/
+dist/
+*.tsbuildinfo
+
+# Local config and secrets
+.env
+.env.*
+!.env.example
+
+# Runtime data, weights, user images
+models/
+weights/
+*.onnx
+*.pt
+*.safetensors
+.local-storage/
+infra/seaweedfs/s3.json

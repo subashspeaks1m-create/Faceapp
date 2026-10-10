@@ -1,0 +1,32 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "job_id": {
+      "format": "uuid",
+      "title": "Job Id",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "requested",
+        "deleting",
+        "complete",
+        "partial_failure"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "requested_at": {
+      "format": "date-time",
+      "title": "Requested At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "job_id",
+    "status",
+    "requested_at"
+  ],
+  "title": "DeletionReceipt",
+  "type": "object"
+}

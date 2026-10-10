@@ -1,0 +1,54 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "consent_receipt_id": {
+      "format": "uuid",
+      "title": "Consent Receipt Id",
+      "type": "string"
+    },
+    "policy_version": {
+      "title": "Policy Version",
+      "type": "string"
+    },
+    "purpose": {
+      "const": "portrait_editing",
+      "title": "Purpose",
+      "type": "string"
+    },
+    "processor_region": {
+      "enum": [
+        "us",
+        "eu"
+      ],
+      "title": "Processor Region",
+      "type": "string"
+    },
+    "accepted_at": {
+      "format": "date-time",
+      "title": "Accepted At",
+      "type": "string"
+    },
+    "withdrawn_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Withdrawn At"
+    }
+  },
+  "required": [
+    "consent_receipt_id",
+    "policy_version",
+    "purpose",
+    "processor_region",
+    "accepted_at"
+  ],
+  "title": "ConsentReceipt",
+  "type": "object"
+}

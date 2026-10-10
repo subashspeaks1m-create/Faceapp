@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "PortraitLab",
+    "slug": "portraitlab",
+    "scheme": "portraitlab",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "app.portraitlab.dev"
+    },
+    "android": {
+      "package": "app.portraitlab.dev"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Choose a photo to edit.",
+          "cameraPermission": "Use your camera when you choose to take a portrait.",
+          "microphonePermission": false
+        }
+      ]
+    ],
+    "web": {
+      "output": "single",
+      "bundler": "metro"
+    }
+  }
+}

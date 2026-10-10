@@ -1,0 +1,45 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "asset_id": {
+      "format": "uuid",
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "normalized_width": {
+      "maximum": 24000,
+      "minimum": 1,
+      "title": "Normalized Width",
+      "type": "integer"
+    },
+    "normalized_height": {
+      "maximum": 24000,
+      "minimum": 1,
+      "title": "Normalized Height",
+      "type": "integer"
+    },
+    "faces": {
+      "items": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "maxItems": 8,
+      "title": "Faces",
+      "type": "array"
+    },
+    "expires_at": {
+      "format": "date-time",
+      "title": "Expires At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "asset_id",
+    "normalized_width",
+    "normalized_height",
+    "faces",
+    "expires_at"
+  ],
+  "title": "AssetReceipt",
+  "type": "object"
+}

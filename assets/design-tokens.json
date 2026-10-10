@@ -1,0 +1,67 @@
+{
+  "colors": {
+    "background": "#0B0D14",
+    "surface": "#171B27",
+    "raised": "#242A3A",
+    "border": "#566078",
+    "text": "#F7F8FC",
+    "muted": "#BBC3D5",
+    "accent": "#B5A5FF",
+    "on_accent": "#151020",
+    "success": "#79E2AC",
+    "warning": "#FFD18B",
+    "error": "#FFADB8"
+  },
+  "typography": {
+    "family": "System / Inter",
+    "h1": {
+      "size": 28,
+      "line_height": 34,
+      "weight": 650
+    },
+    "h2": {
+      "size": 22,
+      "line_height": 28,
+      "weight": 600
+    },
+    "body": {
+      "size": 17,
+      "line_height": 24,
+      "weight": 400
+    },
+    "label": {
+      "size": 15,
+      "line_height": 20,
+      "weight": 550
+    },
+    "caption": {
+      "size": 13,
+      "line_height": 18,
+      "weight": 400
+    }
+  },
+  "spacing": [
+    4,
+    8,
+    12,
+    16,
+    24,
+    32,
+    48,
+    64
+  ],
+  "radii": {
+    "small": 8,
+    "control": 12,
+    "sheet": 24
+  },
+  "touch_min": {
+    "ios": 44,
+    "android": 48
+  },
+  "motion_ms": {
+    "short": 120,
+    "standard": 200,
+    "reduced": 0
+  }
+}

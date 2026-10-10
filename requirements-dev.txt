@@ -1,0 +1,10 @@
+-r apps/api-server/requirements.txt
+-r apps/style-api/requirements.txt
+# NumPy 2.3 is excluded: opencv-python-headless 4.12.0.88 declares numpy<2.3.
+numpy>=2.0,<2.3
+opencv-python-headless==4.12.0.88
+ruff>=0.11,<1
+anyio>=4.9,<5
+httpx==0.28.1
+jsonschema==4.23.0
+PyYAML==6.0.2

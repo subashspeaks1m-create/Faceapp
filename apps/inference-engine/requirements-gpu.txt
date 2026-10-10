@@ -1,0 +1,11 @@
+# Candidate bootstrap bounds; freeze on actual CUDA12/cuDNN-compatible GPU image.
+numpy>=2.0,<2.3
+opencv-python-headless==4.12.0.88
+onnxruntime-gpu>=1.21,<2
+torch>=2.6,<3
+insightface==0.7.3
+diffusers>=0.32,<1
+transformers>=4.49,<5
+accelerate>=1.4,<2
+safetensors>=0.5,<1
+Pillow>=11,<13

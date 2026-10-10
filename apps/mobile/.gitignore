@@ -1,0 +1,6 @@
+# Continuous Native Generation: create with `npx expo prebuild`
+/android
+/ios
+.expo/
+dist/
+/public/canvaskit.wasm

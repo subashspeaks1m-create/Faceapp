@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "status": "no production weights approved",
+  "detector": {
+    "path": null,
+    "sha256": null,
+    "commercial_approval_ref": null,
+    "landmarks": 5
+  },
+  "parser": {
+    "path": null,
+    "sha256": null,
+    "commercial_approval_ref": null,
+    "input": "NCHW RGB ImageNet512",
+    "classes": {
+      "background": 0,
+      "skin": 1,
+      "eyes": [
+        4,
+        5
+      ],
+      "nose": 10,
+      "mouth": 11,
+      "lips": [
+        12,
+        13
+      ],
+      "hair": 17
+    }
+  },
+  "generative_routes": {
+    "age.onnx": {
+      "path": null,
+      "sha256": null,
+      "commercial_approval_ref": null,
+      "benchmarked_p95_ms": null,
+      "ready": false
+    },
+    "expression.onnx": {
+      "path": null,
+      "sha256": null,
+      "commercial_approval_ref": null,
+      "benchmarked_p95_ms": null,
+      "ready": false
+    },
+    "presentation.onnx": {
+      "path": null,
+      "sha256": null,
+      "commercial_approval_ref": null,
+      "benchmarked_p95_ms": null,
+      "ready": false
+    },
+    "hair.onnx": {
+      "path": null,
+      "sha256": null,
+      "commercial_approval_ref": null,
+      "benchmarked_p95_ms": null,
+      "ready": false
+    },
+    "beard.onnx": {
+      "path": null,
+      "sha256": null,
+      "commercial_approval_ref": null,
+      "benchmarked_p95_ms": null,
+      "ready": false
+    },
+    "beauty.compose": {
+      "path": null,
+      "sha256": null,
+      "commercial_approval_ref": null,
+      "benchmarked_p95_ms": null,
+      "ready": false
+    }
+  }
+}
