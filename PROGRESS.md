@@ -131,7 +131,7 @@ Environment variable names: `PORTRAITLAB_ENV`, `DATABASE_URL`, `REDIS_URL`, `S3_
 
 ## Blockers and next steps (dependency order)
 
-1. Run the app on a device: `cd apps/mobile && npx expo run:ios` or `npx expo run:android` (needs Xcode or Android SDK). Check orientation, large photos, export size and share.
+1. Run the app on a device: follow docs/DEVICE_TESTING.md (development build; EAS profiles in apps/mobile/eas.json, not yet run because they need an Expo login).
 2. App side of the cloud flow: consent, upload, face picker, job status, result binding (`src/editor-binding.ts`). Useful only once a model is approved.
 3. Admin (Phase 1 G): OIDC-authenticated, role-checked metadata views.
 4. Approved detector and parser artifacts (path, SHA256, licence approval) to enable face detection, then one approved transformation.
