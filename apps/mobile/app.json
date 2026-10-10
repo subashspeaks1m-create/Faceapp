@@ -2,23 +2,24 @@
   "expo": {
     "name": "PortraitLab",
     "slug": "portraitlab",
+    "scheme": "portraitlab",
     "version": "0.1.0",
-    "newArchEnabled": true,
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "bundleIdentifier": "app.portraitlab.dev"
+    },
+    "android": {
+      "package": "app.portraitlab.dev"
     },
     "plugins": [
-      [
-        "react-native-vision-camera",
-        {
-          "cameraPermissionText": "Use your camera when you choose to take a portrait.",
-          "enableMicrophonePermission": false
-        }
-      ],
+      "expo-router",
       [
         "expo-image-picker",
         {
           "photosPermission": "Choose a photo to edit.",
+          "cameraPermission": "Use your camera when you choose to take a portrait.",
           "microphonePermission": false
         }
       ]

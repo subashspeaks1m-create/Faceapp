@@ -4,10 +4,9 @@
     "jsx": "react-jsx",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "noEmit": true
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "types": ["node"]
   },
-  "include": [
-    "src/**/*.ts",
-    "App.tsx"
-  ]
+  "include": ["app/**/*.tsx", "src/**/*.ts", "src/**/*.tsx", "test/**/*.ts", "expo-env.d.ts"]
 }

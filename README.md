@@ -26,7 +26,7 @@ npm run build --workspaces
 
 Backend with local services (PostgreSQL, Redis, SeaweedFS S3): follow "Startup" in PROGRESS.md. `make test` runs the 25 integration tests when `PORTRAITLAB_TEST_DATABASE_URL` and `PORTRAITLAB_TEST_S3_*` are set. With no approved detector in `model-registry.json`, upload finalization returns 503 `DETECTOR_UNAVAILABLE` and every filter returns `FILTER_UNAVAILABLE`; nothing is simulated.
 
-`make dev-mobile` uses a custom Expo development build; VisionCamera is not available merely by opening Expo Go. `make dev-web` starts Next. Expo 53/Reanimated 3 is the requested legacy compatibility track; see PROGRESS.md for its open npm advisories.
+`make dev-mobile` starts Metro for a custom Expo development build (`npx expo run:ios` / `run:android` from `apps/mobile` builds one). The app is on Expo 57 / Reanimated 4 (ADR 0003). `make dev-web` starts Next.
 
 ## Handoff
 

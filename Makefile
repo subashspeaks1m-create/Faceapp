@@ -13,6 +13,7 @@ build: contracts
 # Unit/contract tests always run; integration tests skip unless PORTRAITLAB_TEST_* is set.
 test:
 	$(PYPATH) $(PYTHON) -m unittest discover -s tests -v
+	npm test --workspace=@portraitlab/mobile
 test-integration:
 	@test -n "$$PORTRAITLAB_TEST_DATABASE_URL" || (echo "Set PORTRAITLAB_TEST_DATABASE_URL and PORTRAITLAB_TEST_S3_*" && exit 1)
 	$(PYPATH) $(PYTHON) -m unittest tests.test_runtime_integration -v

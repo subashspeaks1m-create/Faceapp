@@ -1,6 +1,6 @@
 # PROGRESS
 
-Current phase: **Phase 1, slice 1 (reproducible repo + authenticated backend runtime)**. Updated 2026-10-10.
+Current phase: **Phase 1, slice 2 (Expo 57 upgrade + on-device editor)**; slice 1 was the backend runtime. Updated 2026-10-10.
 
 ## Environment actually available
 
@@ -25,10 +25,10 @@ Legend: **IV** implemented and verified, **IU** implemented but unverified, **SP
 - IV: Hash-pinned `apps/api-server/requirements.lock` used by the Dockerfile (`--require-hashes`).
 - IV: FastAPI 0.115.12/Starlette 0.46.2 had 14 published Starlette advisories (pip-audit). Upgraded to FastAPI 0.143.0 / Starlette 1.7.0; pip-audit now reports none; all tests pass.
 - IV: npm workspaces installed, `package-lock.json` committed. `npm run build` (shared-types tsc, mobile tsc, `next build`) and `npm run lint` pass.
-- IV: Expo SDK 53 alignment via `expo install --check` (offline map): react-native 0.79.6, @shopify/react-native-skia 2.0.0-next.4.
+- IV: Upgraded to Expo 57 / React Native 0.86.3 / Reanimated 4.5.1 / Skia 2.6.2 (owner decision, ADR 0003). `expo install --check` reports aligned.
 - IU: `docker compose` file rewritten (postgres, redis, s3, migrate, api, worker, daemons). The images and commands were exercised individually; the full compose stack was not started as one unit.
 - Note: `MANIFEST.json` and `VALIDATION_REPORT.md` describe the supplied baseline bundle and were intentionally not regenerated; this file records new evidence.
-- Open: `npm audit --omit=dev` reports 39 advisories (21 high), all inside the Expo 53 / React Native 0.79 toolchain (metro, @expo/cli, node-forge, jest-*). Next.js is clean. Fixing them requires leaving the requested Expo 53 / Reanimated 3 track (current Expo is 57). Owner decision needed.
+- Open: `npm audit --omit=dev` still reports 44 advisories after the Expo 57 upgrade, in build tooling (Expo CLI, Metro, Jest, prebuild). node-forge, braces and sprintf-js have no patched release. In app runtime: decode-uri-component via expo-router (DoS on malformed links). Next.js is clean. See ADR 0003.
 
 ### C. Authenticated API and database
 - IV: JWT verification of signature, issuer, audience, expiry, `sub`; `alg` allowlist; `none` and wrong-key tokens rejected. Dev HS256 auth only via `JWT_DEV_HS256_SECRET`, refused when `PORTRAITLAB_ENV=production`; production uses `JWT_PUBLIC_KEY_PEM` or `JWT_JWKS_URL`.
@@ -64,8 +64,16 @@ Legend: **IV** implemented and verified, **IU** implemented but unverified, **SP
 - IV: Inventory sweep deletes prefixes no live row accounts for.
 - SPEC: No claim of GDPR/BIPA compliance; working bytes exist briefly by design.
 
-### B. Mobile editor, G. Admin
-- SPEC: Not started in this slice. Mobile and admin are still the supplied shells (they type-check and build).
+### B. Mobile editor
+- IV: Render engine (`src/editor/render.ts`): crop → LUT → colour matrix, one path for preview and export. Run on CanvasKit in Node: identity export bit-exact at source size; colour within 1/255 and all four LUTs within 2/255 of a CPU reference; preview picture bit-identical to export.
+- IV: Candidate/committed history (apply, discard, undo, redo, reset, 100-entry cap keeping the original), input validation, crop geometry, .cube parsing, generated LUT module drift check. 25 tests.
+- IV: Metro bundles for iOS and Android (`expo export`, Hermes bytecode); `expo prebuild` generates both native projects with camera/photo permission strings.
+- IU: Screens: privacy notice, choose photo (system picker), take photo (system camera, permission denied and Open Settings states), editor with Adjust/Looks/Crop/AI tabs, labelled sliders, Before/After toggle and press-and-hold compare, Undo/Redo/Reset, Apply/Discard, full-size JPEG export to the share sheet. Type-checked and bundled; never run on a device or simulator (none available here).
+- IU: Normalization through expo-image-manipulator: orientation applied, >24 MP downscaled with a notice, PNG re-encode drops metadata. EXIF orientation and ICC handling not verified on devices.
+- SPEC: AI tab lists the 12 filters as "Not available yet"; no upload/consent/job flow in the app yet. No face picker. Crop is centered aspect presets only (no free crop/rotate).
+
+### G. Admin
+- SPEC: Not started. Still the supplied Next.js shell (type-checks and builds).
 
 ## Commands run (this slice)
 
@@ -78,7 +86,12 @@ Legend: **IV** implemented and verified, **IU** implemented but unverified, **SP
 | `scripts/static_check.py` | pass |
 | `npm install`, `npm run build --workspaces`, `npm run lint --workspaces` | pass |
 | `uvx pip-audit -r requirements-dev.lock` | no known vulnerabilities |
-| `npm audit --omit=dev` | 39 advisories in Expo 53/RN 0.79 toolchain |
+| `npm audit --omit=dev` | 44 advisories in Expo 57 build toolchain (ADR 0003) |
+| `npm test --workspace=@portraitlab/mobile` | 25 pass (render tests on CanvasKit 0.41) |
+| `npx tsc --noEmit` (mobile) | pass |
+| `expo install --check` | aligned with Expo 57 |
+| `expo export --platform android --platform ios` | both bundles built (1966 / 1874 modules) |
+| `expo prebuild --no-install --platform all` | native projects generated (then deleted; CNG) |
 | Live server smoke (`uvicorn` + migrate + dev token + consent + presigned PUT + complete) | 503 `DETECTOR_UNAVAILABLE`, as designed |
 | `celery -A portraitlab.tasks worker` | boots, task registered |
 
@@ -110,7 +123,7 @@ Environment variable names: `PORTRAITLAB_ENV`, `DATABASE_URL`, `REDIS_URL`, `S3_
 
 ## Decisions
 
-- Mobile stack is React Native/Expo as specified (not Flutter).
+- Mobile stack is React Native/Expo as specified (not Flutter). Expo 57 + Reanimated 4, system picker/camera instead of VisionCamera (ADR 0003).
 - ADR 0001: consent routes, `AssetFace`, media gateway and schema additions.
 - ADR 0002: SeaweedFS for local S3.
 - One credit unit per job (`CREDIT_UNITS_PER_JOB`); no free grant. Billing is Phase 3.
@@ -118,8 +131,8 @@ Environment variable names: `PORTRAITLAB_ENV`, `DATABASE_URL`, `REDIS_URL`, `S3_
 
 ## Blockers and next steps (dependency order)
 
-1. Owner decision: stay on Expo 53 / Reanimated 3 (39 npm advisories in its toolchain) or move to the current Expo SDK.
-2. Mobile editor (Phase 1 B): picker/camera permissions, normalization, Skia canvas with LUTs and local adjustments, candidate/committed state, compare with accessible alternative, undo/reset, export/share. Can be written and type-checked here; native builds and device tests need a machine with Xcode/Android SDK.
+1. Run the app on a device: `cd apps/mobile && npx expo run:ios` or `npx expo run:android` (needs Xcode or Android SDK). Check orientation, large photos, export size and share.
+2. App side of the cloud flow: consent, upload, face picker, job status, result binding (`src/editor-binding.ts`). Useful only once a model is approved.
 3. Admin (Phase 1 G): OIDC-authenticated, role-checked metadata views.
 4. Approved detector and parser artifacts (path, SHA256, licence approval) to enable face detection, then one approved transformation.
 5. HEIC decoder licensing decision.
