@@ -6,6 +6,7 @@ Stateless: the photo and result exist only in memory for the duration of the req
 from __future__ import annotations
 
 import logging
+import os
 import re
 import time
 import uuid
@@ -18,7 +19,7 @@ from fastapi.responses import JSONResponse, Response
 from starlette.datastructures import UploadFile
 
 from .catalog import Catalog, build_prompt, load_catalog, public_catalog
-from .config import ConfigError, Settings, load_settings
+from .config import ConfigError, Settings, load_settings, parse_origins
 from .errors import ApiError
 from .images import finalize_output, prepare_upload
 from .providers import EditRequest, GeminiImageEditProvider, ImageEditProvider, OpenAIImageEditProvider
@@ -79,6 +80,13 @@ def _make_provider(settings: Settings) -> ImageEditProvider | None:
     )
 
 
+def _fallback_origins() -> tuple[str, ...]:
+    try:
+        return parse_origins(os.environ.get("ALLOWED_ORIGINS", ""), os.environ.get("APP_ENV", "production").strip() or "production")
+    except ConfigError:
+        return ()
+
+
 def create_app(
     settings: Settings | None = None,
     *,
@@ -98,6 +106,7 @@ def create_app(
     if settings is not None and limiter is None:
         limiter = make_limiter(settings)
 
+    cors_origins = settings.allowed_origins if settings is not None else _fallback_origins()
     state = _State(settings=settings, config_error=config_error, catalog=load_catalog(), provider=provider, limiter=limiter)
     app = FastAPI(title="PortraitLab Style API", version=state.catalog.version, docs_url=None, redoc_url=None, openapi_url=None)
     app.state.styleapi = state
@@ -156,6 +165,20 @@ def create_app(
             salt = _DEV_SALT
         return client_id_from(_client_ip(request), salt)
 
+    def _problem() -> str | None:
+        s = state.settings
+        if s is None:
+            return state.config_error
+        if state.provider is None:
+            return "No API key is set for the selected IMAGE_PROVIDER"
+        if s.rate_limit_backend == "upstash" and (s.upstash_url is None or s.upstash_token is None):
+            return "Upstash is not connected (UPSTASH_REDIS_REST_URL/TOKEN or KV_REST_API_URL/TOKEN)"
+        if s.rate_limit_backend == "upstash" and s.rate_limit_salt is None:
+            return "RATE_LIMIT_SALT is not set"
+        if s.is_production and not cors_origins:
+            return "ALLOWED_ORIGINS is not set, so browsers cannot call this API"
+        return None
+
     @app.get("/api/health")
     async def health() -> JSONResponse:
         s = state.settings
@@ -166,6 +189,14 @@ def create_app(
             "provider": getattr(state.provider, "name", None),
             "model": s.active_model if s is not None and state.provider is not None else None,
             "rate_limit_backend": s.rate_limit_backend if s is not None else None,
+            # Non-secret readiness hints so a deploy can be checked from a browser: whether the
+            # limiter has its URL, token and salt (it fails closed without them), which browser
+            # origins may call the API, and the name of a setting refused at startup (never a value).
+            "rate_limit_ready": s is not None and (
+                s.rate_limit_backend != "upstash" or (s.upstash_url is not None and s.upstash_token is not None and s.rate_limit_salt is not None)
+            ),
+            "allowed_origins": list(cors_origins),
+            "problem": _problem(),
             "catalog_version": state.catalog.version,
             "style_count": len(state.catalog.styles),
         }
@@ -253,10 +284,12 @@ def create_app(
         return Response(content=jpeg, media_type="image/jpeg", headers=headers)
 
     # Added last so it is the outermost middleware and error responses also carry CORS headers.
-    if settings is not None and settings.allowed_origins:
+    # When other settings were refused, the origins are still honoured on their own, so the web app
+    # can read the GENERATION_UNAVAILABLE error instead of seeing a blocked (network-error) response.
+    if cors_origins:
         app.add_middleware(
             CORSMiddleware,
-            allow_origins=list(settings.allowed_origins),
+            allow_origins=list(cors_origins),
             allow_methods=["GET", "POST"],
             allow_headers=["Content-Type"],
             expose_headers=_EXPOSED_HEADERS,

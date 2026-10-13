@@ -13,12 +13,15 @@ Readiness without secrets.
   "provider": "openai",
   "model": "gpt-image-2",
   "rate_limit_backend": "upstash",
+  "rate_limit_ready": true,
+  "allowed_origins": ["https://subashspeaks1m-create.github.io"],
+  "problem": null,
   "catalog_version": "2026-10-10.1",
   "style_count": 25
 }
 ```
 
-`provider` is `openai` or `gemini` (the app uses it to name the provider in the consent screen). `status` is `ok`, `provider_not_configured` (no key for the selected provider) or `misconfigured` (settings refused at startup; check the function logs for the setting name).
+`problem` names, in plain words, the first setting stopping generation (never a value): a setting refused at startup, a missing provider key, Upstash not connected, a missing `RATE_LIMIT_SALT`, or no `ALLOWED_ORIGINS` (browsers then cannot call the API and the app shows "Could not reach the style service"). `ALLOWED_ORIGINS` entries are reduced to scheme and host, so `https://site.example/Faceapp/` means `https://site.example`; CORS still applies when other settings were refused, so the app can show the real error. `provider` is `openai` or `gemini` (the app uses it to name the provider in the consent screen). `status` is `ok`, `provider_not_configured` (no key for the selected provider) or `misconfigured` (settings refused at startup; check the function logs for the setting name).
 
 ## GET /api/styles
 

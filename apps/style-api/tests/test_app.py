@@ -163,6 +163,32 @@ class AppTest(unittest.TestCase):
         resp = client.post("/api/generate", data=_form(), files={"image": ("p.jpg", image_bytes("JPEG"), "image/jpeg")})
         self.assertError(resp, "GENERATION_UNAVAILABLE", 503)
 
+    def test_refused_settings_still_answer_the_browser_with_cors(self) -> None:
+        import os
+        from unittest import mock
+
+        env = {"APP_ENV": "production", "ALLOWED_ORIGINS": f"{ORIGIN}/Faceapp", "IMAGE_PROVIDER": "gemini", "GEMINI_API_KEY": SECRET}
+        with mock.patch.dict(os.environ, env, clear=True):
+            app = create_app()
+        client = TestClient(app)
+        health = client.get("/api/health", headers={"origin": ORIGIN})
+        self.assertEqual(health.headers["access-control-allow-origin"], ORIGIN)
+        body = health.json()
+        self.assertEqual(body["status"], "misconfigured")
+        self.assertIn("GEMINI_PAID_TIER", body["problem"])
+        self.assertNotIn(SECRET, json.dumps(body))
+        resp = client.post("/api/generate", data=_form(), files={"image": ("p.jpg", image_bytes("JPEG"), "image/jpeg")}, headers={"origin": ORIGIN})
+        self.assertError(resp, "GENERATION_UNAVAILABLE", 503)
+        self.assertEqual(resp.headers["access-control-allow-origin"], ORIGIN)
+
+    def test_health_names_missing_pieces(self) -> None:
+        health = TestClient(create_app(make_settings())).get("/api/health").json()
+        self.assertEqual((health["problem"], health["rate_limit_ready"], health["allowed_origins"]), (None, True, [ORIGIN]))
+        prod = make_settings(APP_ENV="production", RATE_LIMIT_BACKEND="upstash", ALLOWED_ORIGINS="")
+        health = TestClient(create_app(prod)).get("/api/health").json()
+        self.assertFalse(health["rate_limit_ready"])
+        self.assertIn("Upstash", health["problem"])
+
     def test_gemini_selected_from_settings(self) -> None:
         app = create_app(make_settings(OPENAI_API_KEY="", GEMINI_API_KEY="gem-test-key"))
         health = TestClient(app).get("/api/health").json()

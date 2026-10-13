@@ -9,6 +9,7 @@ import os
 import re
 from dataclasses import dataclass, field
 from typing import Literal
+from urllib.parse import urlsplit
 
 from pydantic import SecretStr
 
@@ -24,6 +25,30 @@ _GEMINI_MODEL = re.compile(r"^[a-z0-9][a-z0-9.\-]{2,63}$")
 
 class ConfigError(ValueError):
     pass
+
+
+def parse_origins(raw: str, environment: str) -> tuple[str, ...]:
+    """Explicit browser origins from ALLOWED_ORIGINS, normalised to scheme://host[:port].
+
+    A browser's Origin header never carries a path, so "https://site.example/app/" is reduced to
+    "https://site.example" (the same site, nothing wider) and a bare host is read as https.
+    Wildcards and plain http (outside development) are refused.
+    """
+    origins: list[str] = []
+    for item in raw.split(","):
+        item = item.strip()
+        if not item:
+            continue
+        if "*" in item:
+            raise ConfigError("ALLOWED_ORIGINS must list explicit https origins (no wildcard)")
+        parts = urlsplit(item if "://" in item else f"https://{item}")
+        allowed_schemes = ("https",) if environment == "production" else ("https", "http")
+        if parts.scheme not in allowed_schemes or not parts.hostname or parts.username or parts.password:
+            raise ConfigError("ALLOWED_ORIGINS must list explicit https origins (no wildcard)")
+        origin = f"{parts.scheme}://{parts.hostname}" + (f":{parts.port}" if parts.port else "")
+        if origin not in origins:
+            origins.append(origin)
+    return tuple(origins)
 
 
 def _int(env: dict[str, str], name: str, default: int, lo: int, hi: int) -> int:
@@ -89,10 +114,7 @@ def load_settings(environ: dict[str, str] | None = None) -> Settings:
     if environment not in ("production", "development", "test"):
         raise ConfigError("APP_ENV must be production, development or test")
 
-    origins = tuple(o.strip().rstrip("/") for o in env.get("ALLOWED_ORIGINS", "").split(",") if o.strip())
-    for o in origins:
-        if o == "*" or not (o.startswith("https://") or (environment != "production" and o.startswith("http://"))):
-            raise ConfigError("ALLOWED_ORIGINS must list explicit https origins (no wildcard)")
+    origins = parse_origins(env.get("ALLOWED_ORIGINS", ""), environment)
 
     model = env.get("OPENAI_IMAGE_MODEL", "gpt-image-2").strip()
     if model not in OPENAI_EDIT_MODELS:

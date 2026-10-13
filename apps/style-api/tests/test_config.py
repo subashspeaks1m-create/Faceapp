@@ -13,6 +13,13 @@ class ConfigTest(unittest.TestCase):
         self.assertFalse(s.provider_configured)
         self.assertEqual(s.allowed_origins, ("https://a.example",))
 
+    def test_origins_are_normalised_to_scheme_and_host(self) -> None:
+        s = load_settings({**BASE, "ALLOWED_ORIGINS": " https://Site.example/Faceapp/ , site2.example, https://a.example:8443/"})
+        self.assertEqual(s.allowed_origins, ("https://site.example", "https://site2.example", "https://a.example:8443"))
+        for bad in ("*", "https://*.example", "http://a.example", "ftp://a.example", "https://user:pw@a.example", "https://"):
+            with self.assertRaises(ConfigError, msg=bad):
+                load_settings({**BASE, "ALLOWED_ORIGINS": bad})
+
     def test_production_refuses_unsafe_settings(self) -> None:
         for env in (
             {**BASE, "ALLOWED_ORIGINS": "*"},
